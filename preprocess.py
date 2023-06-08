@@ -10,6 +10,16 @@ import re
 
 from sklearn.preprocessing import OneHotEncoder
 
+_countries_to_keep = ["KR", "MY",
+                      "TH", "TW", "HK",
+                      "ID", "PK",
+                      "RU"]
+_guest_nationality_countries_to_keep = ["South Korea", "Malaysia", "Taiwan", "Thailand", "Hong Kong", "Indonesia"]
+_hotel_ids_to_keep = [6452, 3098648, 3080111, 1629394]
+_problematic_cust = [3403039646291800000, 989627699560000000, 6096800853640020093, 6754714678033050058,
+                     8370707232058280048]
+_hotel_city_code_to_keep = [220, 1403, 142, 2249, 2224, 2797]
+
 _features = {"hotel_star_rating": (0, 5),
              "no_of_adults": (1, 19),
              "no_of_children": (0, 8),
@@ -19,7 +29,7 @@ _features = {"hotel_star_rating": (0, 5),
 # "request_latecheckin", "request_nonesmoke", "request_earlycheckin", "request_highfloor",
 _dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date", "cancellation_datetime"]
 _irrelevant_features = ["h_booking_id", "hotel_chain_code", "hotel_brand_code",
-                        "hotel_id", "h_customer_id", "hotel_area_code"]
+                        "h_customer_id", "hotel_area_code"]
 _categorial_features = ["hotel_country_code", "accommadation_type_name", "charge_option", "language",
                         "customer_nationality", "guest_nationality_country_name", "origin_country_code",
                         "original_payment_method", "original_payment_type", "original_payment_currency",
@@ -157,6 +167,31 @@ def proccess_dates(df: pd.DataFrame):
         df[f"{label}_year"] = df[label].dt.year
 
 
+def mika_proccess(X):
+    X.loc[~X['accommadation_type_name'].isin(['Hotel', 'Apartment']), 'accommadation_type_name'] = np.nan
+    X.loc[
+        ~X['guest_nationality_country_name'].isin(
+            _guest_nationality_countries_to_keep), 'guest_nationality_country_name'] = np.nan
+
+    X.loc[
+        ~X['origin_country_code'].isin(
+            _countries_to_keep), 'origin_country_code'] = np.nan
+
+    X.loc[
+        ~X['hotel_id'].isin(
+            _hotel_ids_to_keep), 'hotel_id'] = np.nan
+
+    X.loc[~X['h_customer_id'].isin(
+        _problematic_cust), 'h_customer_id'] = 0
+    X.loc[
+        X['h_customer_id'].isin(
+            _problematic_cust), 'h_customer_id'] = 1
+
+    X.loc[
+        ~X['hotel_city_code'].isin(
+            _hotel_city_code_to_keep), 'hotel_city_code'] = np.nan
+
+
 def preprocess_data(X: pd.DataFrame):
     proccess_dates(X)
     add_extra_features(X)
@@ -166,6 +201,7 @@ def preprocess_data(X: pd.DataFrame):
     X.drop("cancellation_policy_code", axis=1, inplace=True)
 
     X.replace(["UNKNOWN"], np.nan, inplace=True)
+    mika_proccess(X)
     # for label in X:  # Replaces invalid values with temporary nan value
     #     X[label] = X[label].mask(~X[label].between(X[label][0], X[label][1], inclusive="both"), np.nan)
 
