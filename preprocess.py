@@ -193,6 +193,7 @@ def preprocess_data(X: pd.DataFrame, y: typing.Optional[pd.Series] = None):
         X = pd.get_dummies(X, prefix=category, columns=[category])
 
     _fill_missings_values(X)
+
     if not is_train:
         return X
 
