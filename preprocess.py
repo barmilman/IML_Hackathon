@@ -3,24 +3,19 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.io as pio
+from sklearn import preprocessing
+from sklearn.impute import KNNImputer
 from sklearn.model_selection import train_test_split
 import re
-# _features = {"hotel_star_rating": (0, 5),
-#              "no_of_adults": (1, 19),
-#              "no_of_children": (0, 8),
-#              "no_of_extra_bed": (0, 4),
-#              "no_of_room": (1, 9),
-#              "waterfront": (0, 1),
-#              "view": (0, 4),
-#              "condition": (1, 5),
-#              "grade": (1, 13),
-#              "sqft_above": (250, 10000),
-#              _sqft_basement_label: (0, 5000),
-#              "yr_built": (1900, 2015),
-#              _yr_renovated_label: (0, 2015),
-#              "zipcode": (98000, 99000),
-#              "lat": (47, 48),
-#              "long": (-123, -121)}
+
+from sklearn.preprocessing import OneHotEncoder
+
+_features = {"hotel_star_rating": (0, 5),
+             "no_of_adults": (1, 19),
+             "no_of_children": (0, 8),
+             "no_of_extra_bed": (0, 4),
+             "no_of_room": (1, 9)}
+
 _dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date", "cancellation_datetime"]
 _irrelevant_features = ["h_booking_id", "hotel_chain_code", "hotel_brand_code", "request_earlycheckin",
                         "request_airport", "request_twinbeds", "request_largebed", "request_highfloor",
@@ -44,7 +39,7 @@ def split_data(X: pd.DataFrame):
     return train_df, test_df, validation_df
 
 
-def _fill_missings_values(X: pd.DataFrame):
+def _fill_missings_values(X: pd.DataFrame) -> pd.DataFrame:
     """
     fills missings values by prediction Parameters
     ----------
@@ -52,21 +47,7 @@ def _fill_missings_values(X: pd.DataFrame):
         Design matrix of regression problem
     """
 
-    model = LinearRegression(include_intercept=True)
-    for label in X.columns:
-        label_X = X.dropna(subset=X.columns.difference([label]))
-        data_to_pred = label_X[label_X[label].isnull()]
-        if data_to_pred.empty:
-            continue
-
-        X_not_null = label_X[label_X[label].notna()]
-        y_pred_train = X_not_null[label]
-        X_pred_train = X_not_null.drop(label, axis=1)
-        X_pred_test = data_to_pred.drop(label, axis=1)
-        model.fit(X_pred_train, y_pred_train)
-
-        predicted_vals = model.predict(X_pred_test).round(decimals=2)
-        X[label].update(pd.Series(predicted_vals, index=X_pred_test.index))
+    return KNNImputer(n_neighbors=2).fit_transform(X)
 
 
 def load_data(filename: str) -> pd.DataFrame:
@@ -176,6 +157,13 @@ def proccess_dates(df: pd.DataFrame):
     for label in _dates:
         df[f"{label}_dayofyear"] = df[label].dt.dayofyear
         df[f"{label}_year"] = df[label].dt.year
+
+
+def encode_features(df: pd.DataFrame):
+    enc = preprocessing.OneHotEncoder()
+    enc.fit(df)
+    OneHotEncoder()
+    enc.transform([['female', 'from US', 'uses Safari'], ['male', 'from Europe', 'uses Safari']]).toarray()
 
 
 def preprocess_data(X: pd.DataFrame, y: typing.Optional[pd.Series] = None):
