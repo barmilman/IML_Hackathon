@@ -10,7 +10,7 @@ import re
 
 from sklearn.preprocessing import OneHotEncoder
 
-_features = {"hotel_star_rating": (0, 5),
+_features = {"hotel_star_rating": (0, 6),
              "no_of_adults": (1, 19),
              "no_of_children": (0, 8),
              "no_of_extra_bed": (0, 4),
