@@ -177,6 +177,7 @@ def preprocess_data(X: pd.DataFrame, y: typing.Optional[pd.Series] = None):
         X = X.drop_duplicates()
 
     proccess_dates(X)
+    add_extra_features(X)
     X.drop(_dates, axis=1, inplace=True)
     X.drop(_irrelevant_features, axis=1, inplace=True)
 
@@ -187,9 +188,6 @@ def preprocess_data(X: pd.DataFrame, y: typing.Optional[pd.Series] = None):
     for category in _categorial_features:  # Handles categorial features
         X[category] = X[category].astype('category')
         X = pd.get_dummies(X, prefix=category, columns=[category])
-
-    add_extra_features(X)
-    X.drop("cancellation_datetime", axis=1, inplace=True)
 
     _fill_missings_values(X)
     if not is_train:
