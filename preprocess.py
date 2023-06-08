@@ -46,13 +46,9 @@ def _fill_missings_values(X: pd.DataFrame) -> pd.DataFrame:
         Design matrix of regression problem
     """
 
-<<<<<<< HEAD
-    return X.fillna(X.mean())
-=======
     imp = SimpleImputer(missing_values=np.nan, strategy='mean')
     imp.fit(X)
     return imp.transform(X)
->>>>>>> 81c644ac3d02fe8b3421210f49d388a3c18a1fa0
 
 
 def load_data(filename: str) -> pd.DataFrame:
