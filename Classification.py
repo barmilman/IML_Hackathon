@@ -1,47 +1,3 @@
-# class Regression:
-#     def __init__(self):
-#         pass
-#
-#     def linear_regression(self, X_train, y_train, X_test, y_test):
-#         from sklearn.linear_model import LinearRegression
-#         model = LinearRegression()
-#         model.fit(X_train, y_train)
-#         return model
-#
-#     def ridge(self, X_train, y_train, X_test, y_test, alpha=0.5):
-#         from sklearn import linear_model
-#         model = linear_model.Ridge(alpha=alpha)
-#         model.fit(X_train, y_train)
-#         return model
-#
-#     def polynomial_regression(self, X_train, y_train, X_test, y_test, degree=3):
-#         from sklearn.preprocessing import PolynomialFeatures
-#         from sklearn.linear_model import LinearRegression
-#         from sklearn.pipeline import Pipeline
-#         model = Pipeline([('poly', PolynomialFeatures(degree=degree)),
-#                           ('linear', LinearRegression(fit_intercept=False))])
-#         model.fit(X_train, y_train)
-#         return model
-#
-#     def svr(self, X_train, y_train, X_test, y_test):
-#         from sklearn import svm
-#         model = svm.SVR()
-#         model.fit(X_train, y_train)
-#         return model
-#
-#     def decision_tree_regression(self, X_train, y_train, X_test, y_test, max_depth=12):
-#         from sklearn.tree import DecisionTreeRegressor
-#         model = DecisionTreeRegressor(max_depth=max_depth)
-#         model.fit(X_train, y_train)
-#         return model
-#
-#     def random_forest_regression(self, X_train, y_train, X_test, y_test, n_estimators=10, max_features=2,
-#                                  max_leaf_nodes=5, random_state=42):
-#         from sklearn.ensemble import RandomForestRegressor
-#         model = RandomForestRegressor(n_estimators=10, max_features=2, max_leaf_nodes=5, random_state=42)
-#         model.fit(X_train, y_train)
-#         return model
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -60,6 +16,89 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier,
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.naive_bayes import GaussianNB
+
+
+class Regression:
+    def __init__(self):
+        pass
+
+    def linear_regression(self, X_train, y_train, X_test, y_test):
+        from sklearn.linear_model import LinearRegression
+        model = LinearRegression()
+        model.fit(X_train, y_train)
+        return model
+
+    def ridge(self, X_train, y_train, X_test, y_test, alpha=0.5):
+        from sklearn import linear_model
+        model = linear_model.Ridge(alpha=alpha)
+        model.fit(X_train, y_train)
+
+        pred_train = model.predict(X_train)
+        print(f"Train MSE: {np.sqrt(mean_squared_error(y_train, pred_train))}")
+        print(f"Train R2_Score: {r2_score(y_train, pred_train)}")
+
+        pred_test = model.predict(X_test)
+        print(f"Test MSE: {np.sqrt(mean_squared_error(y_test, pred_test))}")
+        print(f"Test R2_Score: {r2_score(y_test, pred_test)}")
+
+        return model
+
+    def lasso(self, X_train, y_train, X_test, y_test):
+        from sklearn import linear_model
+        model = linear_model.Lasso(alpha=0.01)
+        model.fit(X_train, y_train)
+
+        pred_train = model.predict(X_train)
+        print(f"Train MSE: {np.sqrt(mean_squared_error(y_train, pred_train))}")
+        print(f"Train R2_Score: {r2_score(y_train, pred_train)}")
+
+        pred_test = model.predict(X_test)
+        print(f"Test MSE: {np.sqrt(mean_squared_error(y_test, pred_test))}")
+        print(f"Test R2_Score: {r2_score(y_test, pred_test)}")
+
+        return model
+
+    def polynomial_regression(self, X_train, y_train, X_test, y_test, degree=3):
+        from sklearn.preprocessing import PolynomialFeatures
+        from sklearn.linear_model import LinearRegression
+        from sklearn.pipeline import Pipeline
+        model = Pipeline([('poly', PolynomialFeatures(degree=degree)),
+                          ('linear', LinearRegression(fit_intercept=False))])
+        model.fit(X_train, y_train)
+        return model
+
+    def svr(self, X_train, y_train, X_test, y_test):
+        from sklearn import svm
+        model = svm.SVR()
+        model.fit(X_train, y_train)
+        return model
+
+    def decision_tree_regression(self, X_train, y_train, X_test, y_test, max_depth=12):
+        from sklearn.tree import DecisionTreeRegressor
+        model = DecisionTreeRegressor(max_depth=max_depth)
+        model.fit(X_train, y_train)
+        return model
+
+    def random_forest_regression(self, X_train, y_train, X_test, y_test, n_estimators=10, max_features=2,
+                                 max_leaf_nodes=5, random_state=42):
+        from sklearn.ensemble import RandomForestRegressor
+
+        model = RandomForestRegressor(n_estimators=10, max_features=2, max_leaf_nodes=5, random_state=42)
+        model.fit(X_train, y_train)
+
+        pred_train = model.predict(X_train)
+        print(f"Train MSE: {np.sqrt(mean_squared_error(y_train, pred_train))}")
+        print(f"Train R2_Score: {r2_score(y_train, pred_train)}")
+
+        pred_test = model.predict(X_test)
+        print(f"Test MSE: {np.sqrt(mean_squared_error(y_test, pred_test))}")
+        print(f"Test R2_Score: {r2_score(y_test, pred_test)}")
+
+        return model
+
+    def run_all(self, X_Train, y_Train, X_Test, y_Test):
+        print("lasso:")
+        self.lasso(X_Train, y_Train, X_Test, y_Test)
 
 
 class Classification:
@@ -264,7 +303,7 @@ class Classification:
         X_test_mm = mm_scaler.transform(X_test)
         return X_train_std, X_test_std, X_train_mm, X_test_mm
 
-    def run_all(self, X_train, y_train, X_test, y_test, is_categorial: bool):
+    def run_all(self, X_train, y_train, X_test, y_test):
         # X_train_std, X_test_std, X_train_mm, X_test_mm = self.data_scaling(X_train, X_test)
         # print("logistic_regression:")
         # self.logistic_regression(X_train_mm, y_train, X_test_mm, y_test)
@@ -292,12 +331,8 @@ class Classification:
         # print("lasso:")
         # self.lasso(X_train, y_train, X_test, y_test)
 
-        if is_categorial:
-            print("gbc:")
-            self.gbc(X_train, y_train, X_test, y_test)
-        else:
-            print("elastic_net:")
-            self.elastic_net(X_train, y_train, X_test, y_test)
+        print("gbc:")
+        self.gbc(X_train, y_train, X_test, y_test)
 
         # print("elastic_net:")
         # self.elastic_net(X_train, y_train, X_test, y_test)

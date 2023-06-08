@@ -10,7 +10,7 @@ import re
 
 from sklearn.preprocessing import OneHotEncoder
 
-from Classification import Classification
+from Classification import Classification, Regression
 
 _countries_to_keep = ["KR", "MY",
                       "TH", "TW", "HK",
@@ -205,7 +205,7 @@ def preprocess_data(X: pd.DataFrame, include_cancelation: bool):
 if __name__ == "__main__":
     file_path = './data_files/agoda_cancellation_train.csv'
 
-    for feature_to_predict in ["order_canceled", "original_selling_amount"]:
+    for feature_to_predict in ["original_selling_amount", "order_canceled"]:
         print("--- New ---")
         is_categorial = feature_to_predict == "order_canceled"
 
@@ -225,4 +225,7 @@ if __name__ == "__main__":
         X_Test = test_df.loc[:, ~test_df.columns.isin([feature_to_predict])]
         y_Test = test_df[feature_to_predict]
 
-        Classification().run_all(X_Train, y_Train, X_Test, y_Test, is_categorial)
+        if is_categorial:
+            Classification().run_all(X_Train, y_Train, X_Test, y_Test)
+        else:
+            Regression().run_all(X_Train, y_Train, X_Test, y_Test)
