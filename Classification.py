@@ -239,8 +239,6 @@ class Classification:
         print(y_test.head())
         print(y_train.head())
 
-
-
         clf = HistGradientBoostingClassifier()
         clf.fit(X_train, y_train)
 
@@ -290,7 +288,6 @@ class Classification:
 
         print("gbc:")
         self.gbc(X_train, y_train, X_test, y_test)
-
 
         # print("lasso:")
         # self.lasso(X_train, y_train, X_test, y_test)

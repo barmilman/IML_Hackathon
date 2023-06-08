@@ -150,6 +150,9 @@ def parse_code_no_show(row, days):
 
 def proccess_dates(df: pd.DataFrame):
     for label in _dates:
+        if label == "cancellation_datetime":
+            continue
+
         df[f"{label}_dayofyear"] = df[label].dt.dayofyear
         df[f"{label}_year"] = df[label].dt.year
 
@@ -188,13 +191,14 @@ if __name__ == "__main__":
     df.to_csv("hey.csv")
 
     train_df, test_df, validation_df = split_data(df)
-
     train_df = train_df.drop_duplicates()
 
-    X_Train = train_df.loc[:, ~train_df.columns.isin(['order_canceled', ])]
+    X_Train = train_df.loc[:, ~train_df.columns.isin(['order_canceled'])]
     y_Train = train_df['order_canceled']
-    X_Test = test_df.loc[:, ~test_df.columns.isin(['order_canceled', ])]
+    X_Test = test_df.loc[:, ~test_df.columns.isin(['order_canceled'])]
     y_Test = test_df['order_canceled']
 
+    print(f"X_Train: {X_Train.columns.tolist()}")
+    print(f"X_Test: {X_Test.columns.tolist()}")
     Classification().run_all(X_Train, y_Train, X_Test, y_Test)
     print(df.columns.tolist())
