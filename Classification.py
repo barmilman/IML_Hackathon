@@ -72,7 +72,7 @@ class Classification:
         logreg_pred = logreg.predict(X_test_mm)
         print("Average cross validation score: {:.3f}".format(scores.mean()))
         print("Test accuracy: {:.3f}".format(logreg.score(X_test_mm, y_test)))
-        print("F1 score: {:.3f}".format(f1_score(y_test, logreg_pred)))
+        print("F1 score: {:.3f}".format(f1_score(y_test, logreg_pred, average="macro")))
         print(confusion_matrix(y_test, logreg_pred))
 
     def linear_svc(self, X_train_mm, y_train, X_test_mm, y_test):
@@ -81,7 +81,7 @@ class Classification:
         svc_pred = svc.predict(X_test_mm)
         print("Average cross validation score: {:.3f}".format(scores.mean()))
         print("Test accuracy: {:.3f}".format(svc.score(X_test_mm, y_test)))
-        print("F1 score: {:.3f}".format(f1_score(y_test, svc_pred)))
+        print("F1 score: {:.3f}".format(f1_score(y_test, svc_pred, average="macro")))
         print(confusion_matrix(y_test, svc_pred))
 
     def sgd(self, X_train_std, y_train, X_test_std, y_test):
@@ -90,7 +90,7 @@ class Classification:
         sgd_pred = sgd.predict(X_test_std)
         print("Average cross validation score: {:.3f}".format(scores.mean()))
         print("Test accuracy: {:.3f}".format(sgd.score(X_test_std, y_test)))
-        print("F1 score: {:.3f}".format(f1_score(y_test, sgd_pred)))
+        print("F1 score: {:.3f}".format(f1_score(y_test, sgd_pred, average="macro")))
         print(confusion_matrix(y_test, sgd_pred))
 
     def ridge(self, X_train, y_train, X_test, y_test, X_test_std, X_train_std):
@@ -101,7 +101,7 @@ class Classification:
         print("Normalized data:")
         print("Average cross validation score: {:.3f}".format(scores.mean()))
         print("Test accuracy: {:.3f}".format(rc.score(X_test, y_test)))
-        print("F1 score: {:.3f}".format(f1_score(y_test, rc_pred)))
+        print("F1 score: {:.3f}".format(f1_score(y_test, rc_pred, average="macro")))
         print(confusion_matrix(y_test, rc_pred))
 
         rc = RidgeClassifier(alpha=1)
@@ -111,7 +111,7 @@ class Classification:
         print("Standard scaled data:")
         print("Average cross validation score: {:.3f}".format(scores.mean()))
         print("Test accuracy: {:.3f}".format(rc.score(X_test_std, y_test)))
-        print("F1 score: {:.3f}".format(f1_score(y_test, rc_pred)))
+        print("F1 score: {:.3f}".format(f1_score(y_test, rc_pred, average="macro")))
         print(confusion_matrix(y_test, rc_pred))
 
     def lasso(self, X_train, y_train, X_test, y_test):
@@ -135,7 +135,9 @@ class Classification:
 
         pred_test_enet = model_enet.predict(X_test)
         print(f"MSE Test: {np.sqrt(mean_squared_error(y_test, pred_test_enet))}")
-        print(f"r2 score train: {r2_score(y_test, pred_test_enet)}")
+        print(f"r2 score test: {r2_score(y_test, pred_test_enet)}")
+
+        print("F1 score: {:.3f}".format(f1_score(y_test, pred_test_enet, average="macro")))
 
     def knn(self, X_train, y_train, X_test, y_test):
         training_accuracy = []
@@ -158,7 +160,7 @@ class Classification:
         knn_pred = knn.predict(X_test)
         print("Average cross validation score: {:.3f}".format(scores.mean()))
         print("Test accuracy: {:.3f}".format(knn.score(X_test, y_test)))
-        print("F1 score: {:.3f}".format(f1_score(y_test, knn_pred)))
+        print("F1 score: {:.3f}".format(f1_score(y_test, knn_pred, average="macro")))
         print(confusion_matrix(y_test, knn_pred))
 
     def decision_tree(self, X_train, y_train, X_test, y_test):
@@ -167,7 +169,7 @@ class Classification:
         tree_pred = tree.predict(X_test)
         print("Average cross validation score: {:.3f}".format(scores.mean()))
         print("Test accuracy: {:.3f}".format(tree.score(X_test, y_test)))
-        print("F1 score: {:.3f}".format(f1_score(y_test, tree_pred)))
+        print("F1 score: {:.3f}".format(f1_score(y_test, tree_pred, average="macro")))
         print(confusion_matrix(y_test, tree_pred))
 
     def classifier(self, X_train, y_train, X_test, y_test, estimator, param_grid):
@@ -208,7 +210,7 @@ class Classification:
         gnb_pred = gnb.predict(X_test)
         print("Average cross validation score: {:.3f}".format(scores.mean()))
         print("Test accuracy: {:.3f}".format(gnb.score(X_test, y_test)))
-        print("F1 score: {:.3f}".format(f1_score(y_test, gnb_pred)))
+        print("F1 score: {:.3f}".format(f1_score(y_test, gnb_pred, average="macro")))
         print(confusion_matrix(y_test, gnb_pred))
 
     def multi_layer_perceptron(self, X_train_std, y_train, X_test_std, y_test):
@@ -217,7 +219,7 @@ class Classification:
         mlp_pred = mlp.predict(X_test_std)
         print("Train score: {:.3f}".format(mlp.score(X_train_std, y_train)))
         print("Test accuracy: {:.3f}".format(mlp.score(X_test_std, y_test)))
-        print("F1 score: {:.3f}".format(f1_score(y_test, mlp_pred)))
+        print("F1 score: {:.3f}".format(f1_score(y_test, mlp_pred, average="macro")))
         print(confusion_matrix(y_test, mlp_pred))
 
     def adaboost(self, X_train, y_train, X_test, y_test):
@@ -232,7 +234,7 @@ class Classification:
         scores = cross_val_score(ada, X_train, y_train, cv=5)
         print("Average cross validation score: {:.3f}".format(scores.mean()))
         print("Test accuracy: {:.3f}".format(ada.score(X_test, y_test)))
-        print("F1 score: {:.3f}".format(f1_score(y_test, ada_pred)))
+        print("F1 score: {:.3f}".format(f1_score(y_test, ada_pred, average="macro")))
         print(confusion_matrix(y_test, ada_pred))
 
     def gbc(self, X_train, y_train, X_test, y_test):
@@ -286,11 +288,11 @@ class Classification:
         # print("adaboost:")
         # self.adaboost(X_train, y_train, X_test, y_test)
 
+        # print("lasso:")
+        # self.lasso(X_train, y_train, X_test, y_test)
+
         print("gbc:")
         self.gbc(X_train, y_train, X_test, y_test)
 
-        # print("lasso:")
-        # self.lasso(X_train, y_train, X_test, y_test)
-        #
         # print("elastic_net:")
         # self.elastic_net(X_train, y_train, X_test, y_test)

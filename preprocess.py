@@ -10,6 +10,8 @@ import re
 
 from sklearn.preprocessing import OneHotEncoder
 
+from Classification import Classification
+
 _countries_to_keep = ["KR", "MY",
                       "TH", "TW", "HK",
                       "ID", "PK",
@@ -79,8 +81,10 @@ def load_data(filename: str) -> pd.DataFrame:
     return pd.read_csv(filename, parse_dates=_dates)
 
 
-def add_extra_features(X: pd.DataFrame):
-    X['order_canceled'] = np.where(X['cancellation_datetime'].isna(), 0, 1)
+def add_extra_features(X: pd.DataFrame, include_cancelation: bool):
+    if include_cancelation:
+        X['order_canceled'] = np.where(X['cancellation_datetime'].isna(), 0, 1)
+
     X['duration_days'] = (X['checkout_date'] - X['checkin_date']).dt.days
     X['booked_days_before'] = (X['booking_datetime'] - X['checkin_date']).dt.days
     X['cancel_code_day_one'] = X.apply(lambda row: parse_code_day_one(row['cancellation_policy_code']), axis=1)
@@ -177,9 +181,9 @@ def mika_proccess(X):
     X.loc[~X['hotel_city_code'].isin(_hotel_city_code_to_keep), 'hotel_city_code'] = np.nan
 
 
-def preprocess_data(X: pd.DataFrame):
+def preprocess_data(X: pd.DataFrame, include_cancelation: bool):
     proccess_dates(X)
-    add_extra_features(X)
+    add_extra_features(X, include_cancelation)
 
     X.drop(_dates, axis=1, inplace=True)
     X.drop(_irrelevant_features, axis=1, inplace=True)
@@ -199,20 +203,24 @@ def preprocess_data(X: pd.DataFrame):
 
 if __name__ == "__main__":
     file_path = './data_files/agoda_cancellation_train.csv'
-    df = load_data(file_path)
-    print(df.head())
-    print(df.info)
 
-    # df.nunique
-    from Classification import Classification
+    for feature_to_predict in ["order_canceled", "original_selling_amount"]:
+        print("--- New ---")
 
-    df = preprocess_data(df)
-    train_df, test_df, validation_df = split_data(df)
-    train_df = train_df.drop_duplicates()
+        df = load_data(file_path)
+        print(df.head())
+        print(df.info)
 
-    X_Train = train_df.loc[:, ~train_df.columns.isin(['order_canceled'])]
-    y_Train = train_df['order_canceled']
-    X_Test = test_df.loc[:, ~test_df.columns.isin(['order_canceled'])]
-    y_Test = test_df['order_canceled']
+        if feature_to_predict == "original_selling_amount":
+            df.drop("cancellation_datetime", axis=1, inplace=True)
 
-    Classification().run_all(X_Train, y_Train, X_Test, y_Test)
+        df = preprocess_data(df, True)
+        train_df, test_df, validation_df = split_data(df)
+        train_df = train_df.drop_duplicates()
+
+        X_Train = train_df.loc[:, ~train_df.columns.isin([feature_to_predict])]
+        y_Train = train_df[feature_to_predict]
+        X_Test = test_df.loc[:, ~test_df.columns.isin([feature_to_predict])]
+        y_Test = test_df[feature_to_predict]
+
+        Classification().run_all(X_Train, y_Train, X_Test, y_Test)
