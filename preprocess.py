@@ -19,7 +19,7 @@ _features = {"hotel_star_rating": (0, 5),
 # "request_latecheckin", "request_nonesmoke", "request_earlycheckin", "request_highfloor",
 _dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date", "cancellation_datetime"]
 _irrelevant_features = ["h_booking_id", "hotel_chain_code", "hotel_brand_code",
-                        "hotel_id", "h_customer_id", "hotel_area_code"]
+                        "hotel_id", "h_customer_id", "hotel_area_code","cencellation_policy_code"]
 _categorial_features = ["hotel_country_code", "accommadation_type_name", "charge_option", "language",
                         "customer_nationality", "guest_nationality_country_name", "origin_country_code",
                         "original_payment_method", "original_payment_type", "original_payment_currency",
@@ -156,7 +156,7 @@ def proccess_dates(df: pd.DataFrame):
 def preprocess_data(X: pd.DataFrame, is_test=False):
     if not is_test:
         X = X.drop_duplicates()
-    len(X)
+
     proccess_dates(X)
     add_extra_features(X)
 
