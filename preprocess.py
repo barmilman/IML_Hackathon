@@ -5,7 +5,22 @@ import plotly.express as px
 import plotly.io as pio
 from sklearn.model_selection import train_test_split
 import re
-
+# _features = {"hotel_star_rating": (0, 5),
+#              "no_of_adults": (1, 19),
+#              "no_of_children": (0, 8),
+#              "no_of_extra_bed": (0, 4),
+#              "no_of_room": (1, 9),
+#              "waterfront": (0, 1),
+#              "view": (0, 4),
+#              "condition": (1, 5),
+#              "grade": (1, 13),
+#              "sqft_above": (250, 10000),
+#              _sqft_basement_label: (0, 5000),
+#              "yr_built": (1900, 2015),
+#              _yr_renovated_label: (0, 2015),
+#              "zipcode": (98000, 99000),
+#              "lat": (47, 48),
+#              "long": (-123, -121)}
 _dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date", "cancellation_datetime"]
 _irrelevant_features = ["h_booking_id", "hotel_chain_code", "hotel_brand_code", "request_earlycheckin",
                         "request_airport", "request_twinbeds", "request_largebed", "request_highfloor",

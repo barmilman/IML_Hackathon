@@ -172,9 +172,10 @@ class Classification:
         self.run_model(RandomForestClassifier(), RandomForestClassifier(n_estimators=50, max_depth=2), param_grid,
                        X_train, y_train, X_test, y_test)
 
-    def gradient_boosted_classifier(self):
+    def gradient_boosted_classifier(self, X_train, y_train, X_test, y_test):
         param_grid = {'max_depth': [1, 2, 5], 'learning_rate': [1, 0.1, 0.001]}
-        self.run_model(GradientBoostingClassifier(), GradientBoostingClassifier(learning_rate=0.001), param_grid)
+        self.run_model(GradientBoostingClassifier(), GradientBoostingClassifier(learning_rate=0.001), param_grid,
+                       X_train, y_train, X_test, y_test)
 
     def naive_bayes(self, X_train, y_train, X_test, y_test):
         gnb = GaussianNB()
