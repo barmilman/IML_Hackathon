@@ -186,10 +186,6 @@ if __name__ == "__main__":
     from Classification import Classification
 
     df = preprocess_data(df)
-    print(df.head())
-    print(df.info)
-    df.to_csv("hey.csv")
-
     train_df, test_df, validation_df = split_data(df)
     train_df = train_df.drop_duplicates()
 
@@ -198,7 +194,4 @@ if __name__ == "__main__":
     X_Test = test_df.loc[:, ~test_df.columns.isin(['order_canceled'])]
     y_Test = test_df['order_canceled']
 
-    print(f"X_Train: {X_Train.columns.tolist()}")
-    print(f"X_Test: {X_Test.columns.tolist()}")
     Classification().run_all(X_Train, y_Train, X_Test, y_Test)
-    print(df.columns.tolist())
