@@ -5,6 +5,7 @@ import plotly.express as px
 import plotly.io as pio
 from sklearn.model_selection import train_test_split
 import re
+
 # _features = {"hotel_star_rating": (0, 5),
 #              "no_of_adults": (1, 19),
 #              "no_of_children": (0, 8),
@@ -92,10 +93,12 @@ def add_extra_features(X: pd.DataFrame):
     X['duration_days'] = (X['checkin_date'] - X['checkout_date']).dt.days
     X['booked_days_before'] = (X['booking_datetime'] - X['checkin_date']).dt.days
     X['cancel_code_day_one'] = df.apply(lambda row: parse_code_day_one(row['cancellation_policy_code']), axis=1)
-    X['cancel_code_return_one'] = df.apply(lambda row: parse_code_return_one(row['cancellation_policy_code']), axis=1)
+    X['cancel_code_return_one'] = df.apply(
+        lambda row: parse_code_return_one(row['cancellation_policy_code'], row['duration_days']), axis=1)
     X['cancel_code_day_two'] = df.apply(lambda row: parse_code_day_two(row['cancellation_policy_code']), axis=1)
-    X['cancel_code_return_two'] = df.apply(lambda row: parse_code_return_two(row['cancellation_policy_code']), axis=1)
-    X['parse_code_no_show'] = df.apply(lambda row: parse_code_no_show(row['cancellation_policy_code']), axis=1)
+    X['cancel_code_return_two'] = df.apply(
+        lambda row: parse_code_return_two(row['cancellation_policy_code'], row['duration_days']), axis=1)
+    X['parse_code_no_show'] = df.apply(lambda row: parse_code_no_show(row['cancellation_policy_code'], row['duration_days']), axis=1)
 
 
 def preprocess_remove_columns_add_dummy(X: pd.DataFrame):
@@ -115,22 +118,22 @@ def parse_code_day_one(row):
         if alphabetic_substrings[0] == 'D':
             return float(numeric_values[0])
     except:
-        return 0
-    return 0
+        return np.nan
+    return np.nan
 
 
-def parse_code_return_one(row):
+def parse_code_return_one(row, days):
     numeric_values = re.findall(r'\d+', row)
     alphabetic_substrings = re.findall(r'[a-zA-Z]+', row)
     try:
         if alphabetic_substrings[1] == 'P':
-            return float(numeric_values[1]) / 100
+            return 1 - float(numeric_values[1]) / 100
         elif alphabetic_substrings[1] == 'N':
-            return -1 * float(numeric_values[1])
+            return 1 - float(numeric_values[1]) / days
         else:
-            return 0
+            return np.nan
     except:
-        return 0
+        return np.nan
 
 
 def parse_code_day_two(row):
@@ -140,25 +143,25 @@ def parse_code_day_two(row):
         if alphabetic_substrings[2] == 'D':
             return float(numeric_values[2])
     except:
-        return 0
-    return 0
+        return np.nan
+    return np.nan
 
 
-def parse_code_return_two(row):
+def parse_code_return_two(row, days):
     numeric_values = re.findall(r'\d+', row)
     alphabetic_substrings = re.findall(r'[a-zA-Z]+', row)
     try:
         if alphabetic_substrings[3] == 'P':
-            return float(numeric_values[1]) / 100
+            return 1 - float(numeric_values[1]) / 100
         elif alphabetic_substrings[3] == 'N':
-            return -1 * float(numeric_values[1])
+            return 1 - float(numeric_values[1]) / days
         else:
-            return 0
+            return np.nan
     except:
-        return 0
+        return np.nan
 
 
-def parse_code_no_show(row):
+def parse_code_no_show(row, days):
     numeric_values = re.findall(r'\d+', row)
     alphabetic_substrings = re.findall(r'[a-zA-Z]+', row)
     try:
@@ -166,10 +169,10 @@ def parse_code_no_show(row):
             if alphabetic_substrings[-1] == 'P':
                 return float(numeric_values[-1]) / 100
             if alphabetic_substrings[-1] == 'N':
-                return -1 * float(numeric_values[1])
-        return 0
+                return 1 - float(numeric_values[1]) / days
+        return np.nan
     except:
-        return 0
+        return np.nan
 
 
 def proccess_dates(df: pd.DataFrame):

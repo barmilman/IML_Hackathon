@@ -212,7 +212,6 @@ class Classification:
         print("F1 score: {:.3f}".format(f1_score(y_test, ada_pred)))
         print(confusion_matrix(y_test, ada_pred))
 
-    def gbc(self, X_train, y_train, X_test, y_test):
 
 
     def data_scaling(self, X_train, X_test):
