@@ -141,7 +141,7 @@ def preprocess_data(X: pd.DataFrame):
     X.drop("cancellation_policy_code", axis=1, inplace=True)
 
     X.replace(["UNKNOWN"], np.nan, inplace=True)
-    mika_proccess(X)
+    # mika_proccess(X)
     # for label in X:  # Replaces invalid values with temporary nan value
     #     X[label] = X[label].mask(~X[label].between(X[label][0], X[label][1], inclusive="both"), np.nan)
 
