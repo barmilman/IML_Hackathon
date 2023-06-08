@@ -185,6 +185,7 @@ if __name__ == "__main__":
     df = preprocess_data(df)
     print(df.head())
     print(df.info)
+    df.to_csv("hey.csv")
 
     train_df, test_df, validation_df = split_data(df)
 
