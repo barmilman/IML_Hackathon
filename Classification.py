@@ -160,16 +160,17 @@ class Classification:
         X_test_select = select_features.transform(X_test)
         return X_train_select, X_test_select
 
-    def run_model(self, model, model_feature, param_grid, X_train, X_test):
+    def run_model(self, model, model_feature, param_grid, X_train, y_train, X_test, y_test):
         print("Before feature selection:")
-        self.classifier(X_train, X_test, model, param_grid)
-        X_train_select, X_test_select = self.feature_selection(model_feature)
+        self.classifier(X_train, y_train, X_test, y_test, model, param_grid)
+        X_train_select, X_test_select = self.feature_selection(model_feature, X_train, y_train, X_test)
         print("After feature selection")
-        self.classifier(X_train_select, X_test_select, model, param_grid)
+        self.classifier(X_train_select, y_train, X_test_select, y_test, model, param_grid)
 
-    def random_forest(self):
+    def random_forest(self, X_train, y_train, X_test, y_test):
         param_grid = {'n_estimators': [50, 75, 100], 'max_depth': [1, 2, 5]}
-        self.run_model(RandomForestClassifier(), RandomForestClassifier(n_estimators=50, max_depth=2), param_grid)
+        self.run_model(RandomForestClassifier(), RandomForestClassifier(n_estimators=50, max_depth=2), param_grid,
+                       X_train, y_train, X_test, y_test)
 
     def gradient_boosted_classifier(self):
         param_grid = {'max_depth': [1, 2, 5], 'learning_rate': [1, 0.1, 0.001]}
@@ -218,26 +219,25 @@ class Classification:
 
     def run_all(self, X_train, y_train, X_test, y_test):
         X_train_std, X_test_std, X_train_mm, X_test_mm = self.data_scaling(X_train, X_test)
-
-        print("logistic_regression:")
-        self.logistic_regression(X_train_mm, y_train, X_test_mm, y_test)
-        print("linear_svc:")
-        self.linear_svc(X_train_mm, y_train, X_test_mm, y_test)
-        print("sgd:")
-        self.sgd(X_train_std, y_train, X_test_std, y_test)
-        print("ridge:")
-        self.ridge(X_train, y_train, X_test, y_test, X_test_std, X_train_std)
-        print("knn:")
-        self.knn(self, X_train, y_train, X_test, y_test)
-        print("decision_tree")
-        self.decision_tree(self, X_train, y_train, X_test, y_test)
+        # print("logistic_regression:")
+        # self.logistic_regression(X_train_mm, y_train, X_test_mm, y_test)
+        # print("linear_svc:")
+        # self.linear_svc(X_train_mm, y_train, X_test_mm, y_test)
+        # print("sgd:")
+        # self.sgd(X_train_std, y_train, X_test_std, y_test)
+        # print("ridge:")
+        # self.ridge(X_train, y_train, X_test, y_test, X_test_std, X_train_std)
+        # print("knn:")
+        # self.knn(X_train, y_train, X_test, y_test)
+        # print("decision_tree")
+        # self.decision_tree( X_train, y_train, X_test, y_test)
         print("random_forest:")
-        self.random_forest()
+        self.random_forest(X_train, y_train, X_test, y_test)
         print("gradient_boosted_classifier:")
-        self.gradient_boosted_classifier()
-        print("naive_bayes:")
-        self.naive_bayes(self, X_train, y_train, X_test, y_test)
-        print("multi_layer_perceptron:")
-        self.multi_layer_perceptron(self, X_train_std, y_train, X_test_std, y_test)
-        print("adaboost:")
-        self.adaboost(self, X_train, y_train, X_test, y_test)
+        self.gradient_boosted_classifier(X_train, y_train, X_test, y_test)
+        # print("naive_bayes:")
+        # self.naive_bayes(X_train, y_train, X_test, y_test)
+        # print("multi_layer_perceptron:")
+        # self.multi_layer_perceptron(X_train_std, y_train, X_test_std, y_test)
+        # print("adaboost:")
+        # self.adaboost(X_train, y_train, X_test, y_test)
