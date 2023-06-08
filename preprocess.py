@@ -45,7 +45,7 @@ def _fill_missings_values(X: pd.DataFrame) -> pd.DataFrame:
         Design matrix of regression problem
     """
 
-    return KNNImputer(n_neighbors=2).fit_transform(X)
+    return X.fillna(X.mean())
 
 
 def load_data(filename: str) -> pd.DataFrame:
