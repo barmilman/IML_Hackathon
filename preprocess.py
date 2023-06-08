@@ -29,7 +29,7 @@ _features = {"hotel_star_rating": (0, 5),
              "no_of_room": (1, 9)}
 
 # "request_latecheckin", "request_nonesmoke", "request_earlycheckin", "request_highfloor",
-_dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date", "cancellation_datetime"]
+_dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date"]
 _irrelevant_features = ["h_booking_id", "hotel_chain_code", "hotel_brand_code", "hotel_area_code"]
 _categorial_features = ["hotel_country_code", "accommadation_type_name", "charge_option", "language",
                         "customer_nationality", "guest_nationality_country_name", "origin_country_code",
@@ -84,6 +84,7 @@ def load_data(filename: str) -> pd.DataFrame:
 def add_extra_features(X: pd.DataFrame, include_cancelation: bool):
     if include_cancelation:
         X['order_canceled'] = np.where(X['cancellation_datetime'].isna(), 0, 1)
+        X.drop("cancellation_datetime", axis=1, inplace=True)
 
     X['duration_days'] = (X['checkout_date'] - X['checkin_date']).dt.days
     X['booked_days_before'] = (X['booking_datetime'] - X['checkin_date']).dt.days
