@@ -22,7 +22,6 @@ if __name__ == "__main__":
 
     # Price
     df_price = load_data(file_path)
-    df_price.drop("cancellation_datetime", axis=1, inplace=True)
 
     df_price = task_2.preprocess_data(df_price)
     train_df, test_df = split_data(df_price)
