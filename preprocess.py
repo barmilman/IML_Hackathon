@@ -171,12 +171,8 @@ def preprocess_data(X: pd.DataFrame, is_test=False):
         X = pd.get_dummies(X, prefix=category, columns=[category])
 
     _fill_missings_values(X)
-<<<<<<< HEAD
 
-    if not is_train:
-=======
     if is_test:
->>>>>>> 65867d16911f629adf2572af193b99b0e487b846
         return X
 
     X = X.reset_index(drop=True)
