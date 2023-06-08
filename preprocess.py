@@ -19,8 +19,7 @@ _features = {"hotel_star_rating": (0, 5),
 _dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date", "cancellation_datetime"]
 _irrelevant_features = ["h_booking_id", "hotel_chain_code", "hotel_brand_code", "request_earlycheckin",
                         "request_airport", "request_twinbeds", "request_largebed", "request_highfloor",
-                        "cancellation_policy_code", "hotel_id", "h_customer_id",
-                        "request_latecheckin", "request_nonesmoke", "hotel_area_code", ]
+                        "hotel_id", "h_customer_id", "request_latecheckin", "request_nonesmoke", "hotel_area_code"]
 _categorial_features = ["hotel_country_code", "accommadation_type_name", "charge_option", "language",
                         "customer_nationality", "guest_nationality_country_name", "origin_country_code",
                         "original_payment_method", "original_payment_type", "original_payment_currency",
@@ -77,16 +76,6 @@ def add_extra_features(X: pd.DataFrame):
     X['cancel_code_day_two'] = df.apply(lambda row: parse_code_day_two(row['cancellation_policy_code']), axis=1)
     X['cancel_code_return_two'] = df.apply(lambda row: parse_code_return_two(row['cancellation_policy_code']), axis=1)
     X['parse_code_no_show'] = df.apply(lambda row: parse_code_no_show(row['cancellation_policy_code']), axis=1)
-
-
-def preprocess_remove_columns_add_dummy(X: pd.DataFrame):
-    for feat in _irrelevant_features:
-        X.drop(feat, axis=1, inplace=True)
-        # print(X[feat])
-    for label in _dates:
-        X.drop(label, axis=1, inplace=True)
-    X = pd.get_dummies(df, prefix=_categorial_features, columns=_categorial_features)
-    return X
 
 
 def parse_code_day_one(row):
@@ -188,11 +177,11 @@ def preprocess_data(X: pd.DataFrame, y: typing.Optional[pd.Series] = None):
         X = X.assign(order_canceled=y)
         X = X.drop_duplicates()
 
-    X = X.drop(_irrelevant_features, axis=1)  # Irrelevant features
-
     proccess_dates(X)
-    X = X.drop(_dates, axis=1)  # Irrelevant features
+    X.drop(_dates, axis=1, inplace=True)
+    X.drop(_irrelevant_features, axis=1, inplace=True)
 
+    X.replace(["UNKNOWN"], np.nan)
     for label in X:  # Replaces invalid values with temporary nan value
         X[label] = X[label].mask(~X[label].between(X[label][0], X[label][1], inclusive="both"), np.nan)
 
@@ -201,14 +190,15 @@ def preprocess_data(X: pd.DataFrame, y: typing.Optional[pd.Series] = None):
         X = pd.get_dummies(X, prefix=category, columns=[category])
 
     add_extra_features(X)
+    X.drop("cancellation_datetime", axis=1, inplace=True)
 
     _fill_missings_values(X)
     if not is_train:
         return X
 
     X = X.reset_index(drop=True)
-    post_processed_y = X["y_train"]
-    return X.drop("y_train", axis=1), post_processed_y
+    post_processed_y = X["order_canceled"]
+    return X.drop("order_canceled", axis=1), post_processed_y
 
 
 if __name__ == "__main__":
@@ -216,14 +206,17 @@ if __name__ == "__main__":
     df = load_data(file_path)
     print(df.head())
     print(df.info)
-    add_extra_features(df)
-    df = preprocess_remove_columns_add_dummy(df)
+
     # df.nunique
     from Classification import Classification
 
     train_df, test_df, validation_df = split_data(df)
     X_Train = train_df.loc[:, ~train_df.columns.isin(['order_canceled', ])]
+    y_Train = train_df['order_canceled']
     X_Test = test_df.loc[:, ~test_df.columns.isin(['order_canceled', ])]
+    y_Test = test_df['order_canceled']
+    preprocess_data(X_Train, y_Train)
+    preprocess_data(X_Test)
 
-    Classification().run_all(X_Train, train_df['order_canceled'], X_Test, test_df['order_canceled'])
+    Classification().run_all(X_Train, y_Train, X_Test, y_Test)
     print(df.columns.tolist())
