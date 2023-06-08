@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.io as pio
+from sklearn import preprocessing
+from sklearn.impute import KNNImputer
 from sklearn.model_selection import train_test_split
 import re
 
@@ -22,11 +24,19 @@ import re
 #              "zipcode": (98000, 99000),
 #              "lat": (47, 48),
 #              "long": (-123, -121)}
-_dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date", "cancellation_datetime"]
-_irrelevant_features = ["h_booking_id", "hotel_chain_code", "hotel_brand_code", "request_earlycheckin",
-                        "request_airport", "request_twinbeds", "request_largebed", "request_highfloor",
-                        "cancellation_policy_code", "hotel_id", "h_customer_id",
-                        "request_latecheckin", "request_nonesmoke", "hotel_area_code", ]
+from sklearn.preprocessing import OneHotEncoder
+
+_features = {"hotel_star_rating": (0, 5),
+             "no_of_adults": (1, 19),
+             "no_of_children": (0, 8),
+             "no_of_extra_bed": (0, 4),
+             "no_of_room": (1, 9)}
+# "request_earlycheckin","request_airport", "request_twinbeds", "request_largebed", "request_highfloor",
+_dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date", "cancellation_datetime",
+          "request_nonesmoke",
+          "request_latecheckin"]
+_irrelevant_features = ["h_booking_id", "hotel_chain_code", "hotel_brand_code",
+                        "cancellation_policy_code", "hotel_id", "h_customer_id", "hotel_area_code"]
 _categorial_features = ["hotel_country_code", "accommadation_type_name", "charge_option", "language",
                         "customer_nationality", "guest_nationality_country_name", "origin_country_code",
                         "original_payment_method", "original_payment_type", "original_payment_currency",
@@ -45,7 +55,7 @@ def split_data(X: pd.DataFrame):
     return train_df, test_df, validation_df
 
 
-def _fill_missings_values(X: pd.DataFrame):
+def _fill_missings_values(X: pd.DataFrame) -> pd.DataFrame:
     """
     fills missings values by prediction Parameters
     ----------
@@ -53,21 +63,7 @@ def _fill_missings_values(X: pd.DataFrame):
         Design matrix of regression problem
     """
 
-    model = LinearRegression(include_intercept=True)
-    for label in X.columns:
-        label_X = X.dropna(subset=X.columns.difference([label]))
-        data_to_pred = label_X[label_X[label].isnull()]
-        if data_to_pred.empty:
-            continue
-
-        X_not_null = label_X[label_X[label].notna()]
-        y_pred_train = X_not_null[label]
-        X_pred_train = X_not_null.drop(label, axis=1)
-        X_pred_test = data_to_pred.drop(label, axis=1)
-        model.fit(X_pred_train, y_pred_train)
-
-        predicted_vals = model.predict(X_pred_test).round(decimals=2)
-        X[label].update(pd.Series(predicted_vals, index=X_pred_test.index))
+    return KNNImputer(n_neighbors=2).fit_transform(X)
 
 
 def load_data(filename: str) -> pd.DataFrame:
@@ -98,7 +94,8 @@ def add_extra_features(X: pd.DataFrame):
     X['cancel_code_day_two'] = df.apply(lambda row: parse_code_day_two(row['cancellation_policy_code']), axis=1)
     X['cancel_code_return_two'] = df.apply(
         lambda row: parse_code_return_two(row['cancellation_policy_code'], row['duration_days']), axis=1)
-    X['parse_code_no_show'] = df.apply(lambda row: parse_code_no_show(row['cancellation_policy_code'], row['duration_days']), axis=1)
+    X['parse_code_no_show'] = df.apply(
+        lambda row: parse_code_no_show(row['cancellation_policy_code'], row['duration_days']), axis=1)
 
 
 def preprocess_remove_columns_add_dummy(X: pd.DataFrame):
@@ -118,8 +115,8 @@ def parse_code_day_one(row):
         if alphabetic_substrings[0] == 'D':
             return float(numeric_values[0])
     except:
-        return np.nan
-    return np.nan
+        return 0
+    return 0
 
 
 def parse_code_return_one(row, days):
@@ -131,9 +128,9 @@ def parse_code_return_one(row, days):
         elif alphabetic_substrings[1] == 'N':
             return 1 - float(numeric_values[1]) / days
         else:
-            return np.nan
+            return 0
     except:
-        return np.nan
+        return 0
 
 
 def parse_code_day_two(row):
@@ -143,8 +140,8 @@ def parse_code_day_two(row):
         if alphabetic_substrings[2] == 'D':
             return float(numeric_values[2])
     except:
-        return np.nan
-    return np.nan
+        return 0
+    return 0
 
 
 def parse_code_return_two(row, days):
@@ -156,9 +153,9 @@ def parse_code_return_two(row, days):
         elif alphabetic_substrings[3] == 'N':
             return 1 - float(numeric_values[1]) / days
         else:
-            return np.nan
+            return 0
     except:
-        return np.nan
+        return 0
 
 
 def parse_code_no_show(row, days):
@@ -170,15 +167,22 @@ def parse_code_no_show(row, days):
                 return float(numeric_values[-1]) / 100
             if alphabetic_substrings[-1] == 'N':
                 return 1 - float(numeric_values[1]) / days
-        return np.nan
+        return 0
     except:
-        return np.nan
+        return 0
 
 
 def proccess_dates(df: pd.DataFrame):
     for label in _dates:
         df[f"{label}_dayofyear"] = df[label].dt.dayofyear
         df[f"{label}_year"] = df[label].dt.year
+
+
+def encode_features(df: pd.DataFrame):
+    enc = preprocessing.OneHotEncoder()
+    enc.fit(df)
+    OneHotEncoder()
+    enc.transform([['female', 'from US', 'uses Safari'], ['male', 'from Europe', 'uses Safari']]).toarray()
 
 
 def preprocess_data(X: pd.DataFrame, y: typing.Optional[pd.Series] = None):
@@ -227,11 +231,17 @@ def preprocess_data(X: pd.DataFrame, y: typing.Optional[pd.Series] = None):
 
 
 if __name__ == "__main__":
+    small_feat = ['no_of_adults', 'no_of_children', 'no_of_extra_bed', 'no_of_room',
+                  'duration_days', 'booked_days_before', 'hotel_star_rating', 'cancel_code_day_one',
+                  'cancel_code_return_one', 'cancel_code_day_two', 'cancel_code_return_two', 'parse_code_no_show'
+                  ]
     file_path = './data_files/agoda_cancellation_train.csv'
     df = load_data(file_path)
     print(df.head())
     print(df.info)
     add_extra_features(df)
+    print(df.columns.tolist())
+
     df = preprocess_remove_columns_add_dummy(df)
     # df.nunique
     from Classification import Classification
@@ -240,5 +250,6 @@ if __name__ == "__main__":
     X_Train = train_df.loc[:, ~train_df.columns.isin(['order_canceled', ])]
     X_Test = test_df.loc[:, ~test_df.columns.isin(['order_canceled', ])]
 
-    Classification().run_all(X_Train, train_df['order_canceled'], X_Test, test_df['order_canceled'])
+    Classification().run_all(X_Train, train_df['order_canceled'], X_Test,
+                             test_df['order_canceled'])
     print(df.columns.tolist())

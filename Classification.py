@@ -44,19 +44,19 @@
 
 import numpy as np
 import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
 
 from sklearn.preprocessing import LabelEncoder, StandardScaler, MinMaxScaler
 from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
-from sklearn.metrics import f1_score, confusion_matrix
+from sklearn.metrics import f1_score, confusion_matrix, mean_squared_error, r2_score
 from sklearn.svm import SVC
 
-from sklearn.linear_model import LogisticRegression, RidgeClassifier, SGDClassifier
+from sklearn.linear_model import LogisticRegression, RidgeClassifier, SGDClassifier, ElasticNet, Lasso
 from sklearn.svm import LinearSVC
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, AdaBoostClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, AdaBoostClassifier, \
+    HistGradientBoostingClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.naive_bayes import GaussianNB
@@ -113,6 +113,29 @@ class Classification:
         print("Test accuracy: {:.3f}".format(rc.score(X_test_std, y_test)))
         print("F1 score: {:.3f}".format(f1_score(y_test, rc_pred)))
         print(confusion_matrix(y_test, rc_pred))
+
+    def lasso(self, X_train, y_train, X_test, y_test):
+        model_lasso = Lasso(alpha=0.01)
+        model_lasso.fit(X_train, y_train)
+        pred_train_lasso = model_lasso.predict(X_train)
+        print(np.sqrt(mean_squared_error(y_train, pred_train_lasso)))
+        print(r2_score(y_train, pred_train_lasso))
+
+        pred_test_lasso = model_lasso.predict(X_test)
+        print(np.sqrt(mean_squared_error(y_test, pred_test_lasso)))
+        print(r2_score(y_test, pred_test_lasso))
+
+    def elastic_net(self, X_train, y_train, X_test, y_test):
+        # Elastic Net
+        model_enet = ElasticNet(alpha=0.01)
+        model_enet.fit(X_train, y_train)
+        pred_train_enet = model_enet.predict(X_train)
+        print(f"MSE Train: {np.sqrt(mean_squared_error(y_train, pred_train_enet))}")
+        print(f"r2 score train: {r2_score(y_train, pred_train_enet)}")
+
+        pred_test_enet = model_enet.predict(X_test)
+        print(f"MSE Test: {np.sqrt(mean_squared_error(y_test, pred_test_enet))}")
+        print(f"r2 score train: {r2_score(y_test, pred_test_enet)}")
 
     def knn(self, X_train, y_train, X_test, y_test):
         training_accuracy = []
@@ -213,6 +236,18 @@ class Classification:
         print(confusion_matrix(y_test, ada_pred))
 
 
+    def gbc(self, X_train, y_train, X_test, y_test):
+        clf = HistGradientBoostingClassifier()
+        clf.fit(X_train, y_train)
+
+
+        clf_pred = clf.predict(X_test)
+        scores = cross_val_score(clf, X_train, y_train, cv=5)
+        print("Average cross validation score: {:.3f}".format(scores.mean()))
+        print("Test accuracy: {:.3f}".format(clf.score(X_test, y_test)))
+        print("F1 score: {:.3f}".format(f1_score(y_test, clf_pred)))
+        print(confusion_matrix(y_test, clf_pred))
+
 
     def data_scaling(self, X_train, X_test):
         std_scaler = StandardScaler()
@@ -225,6 +260,7 @@ class Classification:
         X_train_mm = mm_scaler.transform(X_train)
         X_test_mm = mm_scaler.transform(X_test)
         return X_train_std, X_test_std, X_train_mm, X_test_mm
+
 
     def run_all(self, X_train, y_train, X_test, y_test):
         X_train_std, X_test_std, X_train_mm, X_test_mm = self.data_scaling(X_train, X_test)
@@ -248,5 +284,14 @@ class Classification:
         # self.naive_bayes(X_train, y_train, X_test, y_test)
         # print("multi_layer_perceptron:")
         # self.multi_layer_perceptron(X_train_std, y_train, X_test_std, y_test)
-        print("adaboost:")
-        self.adaboost(X_train, y_train, X_test, y_test)
+        # print("adaboost:")
+        # self.adaboost(X_train, y_train, X_test, y_test)
+        #
+        print("gbc:")
+        self.gbc(X_train, y_train, X_test, y_test)
+
+        # print("lasso:")
+        # self.lasso(X_train, y_train, X_test, y_test)
+        #
+        # print("elastic_net:")
+        # self.elastic_net(X_train, y_train, X_test, y_test)
