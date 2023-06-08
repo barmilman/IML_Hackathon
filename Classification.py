@@ -138,6 +138,7 @@ class Classification:
         print(f"r2 score test: {r2_score(y_test, pred_test_enet)}")
 
         print("F1 score: {:.3f}".format(f1_score(y_test, pred_test_enet, average="macro")))
+        print(confusion_matrix(y_test, pred_test_enet))
 
     def knn(self, X_train, y_train, X_test, y_test):
         training_accuracy = []
@@ -263,7 +264,7 @@ class Classification:
         X_test_mm = mm_scaler.transform(X_test)
         return X_train_std, X_test_std, X_train_mm, X_test_mm
 
-    def run_all(self, X_train, y_train, X_test, y_test):
+    def run_all(self, X_train, y_train, X_test, y_test, is_categorial: bool):
         # X_train_std, X_test_std, X_train_mm, X_test_mm = self.data_scaling(X_train, X_test)
         # print("logistic_regression:")
         # self.logistic_regression(X_train_mm, y_train, X_test_mm, y_test)
@@ -291,8 +292,12 @@ class Classification:
         # print("lasso:")
         # self.lasso(X_train, y_train, X_test, y_test)
 
-        print("gbc:")
-        self.gbc(X_train, y_train, X_test, y_test)
+        if is_categorial:
+            print("gbc:")
+            self.gbc(X_train, y_train, X_test, y_test)
+        else:
+            print("elastic_net:")
+            self.elastic_net(X_train, y_train, X_test, y_test)
 
         # print("elastic_net:")
         # self.elastic_net(X_train, y_train, X_test, y_test)

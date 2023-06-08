@@ -206,15 +206,16 @@ if __name__ == "__main__":
 
     for feature_to_predict in ["order_canceled", "original_selling_amount"]:
         print("--- New ---")
+        is_categorial = feature_to_predict == "order_canceled"
 
         df = load_data(file_path)
         print(df.head())
         print(df.info)
 
-        if feature_to_predict == "original_selling_amount":
+        if not is_categorial:
             df.drop("cancellation_datetime", axis=1, inplace=True)
 
-        df = preprocess_data(df, True)
+        df = preprocess_data(df, is_categorial)
         train_df, test_df, validation_df = split_data(df)
         train_df = train_df.drop_duplicates()
 
@@ -223,4 +224,4 @@ if __name__ == "__main__":
         X_Test = test_df.loc[:, ~test_df.columns.isin([feature_to_predict])]
         y_Test = test_df[feature_to_predict]
 
-        Classification().run_all(X_Train, y_Train, X_Test, y_Test)
+        Classification().run_all(X_Train, y_Train, X_Test, y_Test, is_categorial)
