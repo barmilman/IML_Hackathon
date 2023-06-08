@@ -153,26 +153,8 @@ def proccess_dates(df: pd.DataFrame):
         df[f"{label}_year"] = df[label].dt.year
 
 
-def preprocess_data(X: pd.DataFrame, y: typing.Optional[pd.Series] = None):
-    """
-    preprocess data
-    Parameters
-    ----------
-    X : DataFrame of shape (n_samples, n_features)
-        Design matrix of regression problem
-
-    y : array-like of shape (n_samples, )
-        Response vector corresponding given samples
-
-    Returns
-    -------
-    Post-processed design matrix and response vector (prices) - either as a single
-    DataFrame or a Tuple[DataFrame, Series]
-    """
-
-    is_train = y is not None
-    if is_train:
-        X = X.assign(order_canceled=y)
+def preprocess_data(X: pd.DataFrame, is_test=False):
+    if not is_test:
         X = X.drop_duplicates()
 
     proccess_dates(X)
@@ -189,7 +171,7 @@ def preprocess_data(X: pd.DataFrame, y: typing.Optional[pd.Series] = None):
         X = pd.get_dummies(X, prefix=category, columns=[category])
 
     _fill_missings_values(X)
-    if not is_train:
+    if is_test:
         return X
 
     X = X.reset_index(drop=True)
@@ -207,12 +189,13 @@ if __name__ == "__main__":
     from Classification import Classification
 
     train_df, test_df, validation_df = split_data(df)
+    train_df = preprocess_data(train_df)
+    test_df = preprocess_data(test_df, is_test=True)
+
     X_Train = train_df.loc[:, ~train_df.columns.isin(['order_canceled', ])]
     y_Train = train_df['order_canceled']
     X_Test = test_df.loc[:, ~test_df.columns.isin(['order_canceled', ])]
     y_Test = test_df['order_canceled']
-    X_Train, y_Train = preprocess_data(X_Train, y_Train)
-    X_Test = preprocess_data(X_Test)
 
     Classification().run_all(X_Train, y_Train, X_Test, y_Test)
     print(df.columns.tolist())
