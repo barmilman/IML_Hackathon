@@ -19,7 +19,7 @@ _features = {"hotel_star_rating": (0, 5),
 # "request_latecheckin", "request_nonesmoke", "request_earlycheckin", "request_highfloor",
 _dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date", "cancellation_datetime"]
 _irrelevant_features = ["h_booking_id", "hotel_chain_code", "hotel_brand_code",
-                        "hotel_id", "h_customer_id", "hotel_area_code","cencellation_policy_code"]
+                        "hotel_id", "h_customer_id", "hotel_area_code"]
 _categorial_features = ["hotel_country_code", "accommadation_type_name", "charge_option", "language",
                         "customer_nationality", "guest_nationality_country_name", "origin_country_code",
                         "original_payment_method", "original_payment_type", "original_payment_currency",
@@ -64,9 +64,7 @@ def load_data(filename: str) -> pd.DataFrame:
     Design matrix and response vector (Temp)
     """
 
-    df = pd.read_csv(filename, parse_dates=_dates)
-
-    return df
+    return pd.read_csv(filename, parse_dates=_dates)
 
 
 def add_extra_features(X: pd.DataFrame):
@@ -162,6 +160,7 @@ def preprocess_data(X: pd.DataFrame, is_test=False):
 
     X.drop(_dates, axis=1, inplace=True)
     X.drop(_irrelevant_features, axis=1, inplace=True)
+    X.drop("cancellation_policy_code", axis=1, inplace=True)
 
     X.replace(["UNKNOWN"], np.nan)
     # for label in X:  # Replaces invalid values with temporary nan value
@@ -172,9 +171,6 @@ def preprocess_data(X: pd.DataFrame, is_test=False):
         X = pd.get_dummies(X, prefix=category, columns=[category])
 
     _fill_missings_values(X)
-
-    if is_test:
-        return X
 
     X = X.reset_index(drop=True)
     post_processed_y = X["order_canceled"]
@@ -191,13 +187,8 @@ if __name__ == "__main__":
     from Classification import Classification
 
     train_df, test_df, validation_df = split_data(df)
-    train_df = preprocess_data(train_df)
-    test_df = preprocess_data(test_df, is_test=True)
-
-    X_Train = train_df.loc[:, ~train_df.columns.isin(['order_canceled', ])]
-    y_Train = train_df['order_canceled']
-    X_Test = test_df.loc[:, ~test_df.columns.isin(['order_canceled', ])]
-    y_Test = test_df['order_canceled']
+    X_Train, y_Train = preprocess_data(train_df)
+    X_Test, y_Test = preprocess_data(test_df, is_test=True)
 
     Classification().run_all(X_Train, y_Train, X_Test, y_Test)
     print(df.columns.tolist())
