@@ -151,10 +151,7 @@ def proccess_dates(df: pd.DataFrame):
         df[f"{label}_year"] = df[label].dt.year
 
 
-def preprocess_data(X: pd.DataFrame, is_test=False):
-    if not is_test:
-        X = X.drop_duplicates()
-
+def preprocess_data(X: pd.DataFrame):
     proccess_dates(X)
     add_extra_features(X)
 
@@ -173,8 +170,7 @@ def preprocess_data(X: pd.DataFrame, is_test=False):
     _fill_missings_values(X)
 
     X = X.reset_index(drop=True)
-    post_processed_y = X["order_canceled"]
-    return X.drop("order_canceled", axis=1), post_processed_y
+    return X
 
 
 if __name__ == "__main__":
@@ -186,9 +182,15 @@ if __name__ == "__main__":
     # df.nunique
     from Classification import Classification
 
+    df = preprocess_data(df)
     train_df, test_df, validation_df = split_data(df)
-    X_Train, y_Train = preprocess_data(train_df)
-    X_Test, y_Test = preprocess_data(test_df, is_test=True)
+
+    train_df = train_df.drop_duplicates()
+
+    X_Train = train_df.loc[:, ~train_df.columns.isin(['order_canceled', ])]
+    y_Train = train_df['order_canceled']
+    X_Test = test_df.loc[:, ~test_df.columns.isin(['order_canceled', ])]
+    y_Test = test_df['order_canceled']
 
     Classification().run_all(X_Train, y_Train, X_Test, y_Test)
     print(df.columns.tolist())
