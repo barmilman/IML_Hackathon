@@ -8,17 +8,17 @@ if __name__ == "__main__":
     file_path = './data_files/agoda_cancellation_train.csv'
 
     # Order Cancelation
-    df_cancel = load_data(file_path)
-    df_cancel = task_1.preprocess_data(df_cancel)
-    train_df, test_df, validation_df = split_data(df_cancel)
-    train_df = train_df.drop_duplicates()
-
-    X_Train = train_df.loc[:, ~train_df.columns.isin(["order_cancelled"])]
-    y_Train = train_df["order_cancelled"]
-    X_Test = test_df.loc[:, ~test_df.columns.isin(["order_cancelled"])]
-    y_Test = test_df["order_cancelled"]
-
-    Classification().run_all(X_Train, y_Train, X_Test, y_Test)
+    # df_cancel = load_data(file_path)
+    # df_cancel = task_1.preprocess_data(df_cancel)
+    # train_df, test_df, validation_df = split_data(df_cancel)
+    # train_df = train_df.drop_duplicates()
+    #
+    # X_Train = train_df.loc[:, ~train_df.columns.isin(["order_cancelled"])]
+    # y_Train = train_df["order_cancelled"]
+    # X_Test = test_df.loc[:, ~test_df.columns.isin(["order_cancelled"])]
+    # y_Test = test_df["order_cancelled"]
+    #
+    # Classification().run_all(X_Train, y_Train, X_Test, y_Test)
 
     # Price
     df_price = load_data(file_path)
