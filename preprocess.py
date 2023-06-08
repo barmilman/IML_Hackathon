@@ -169,27 +169,13 @@ def proccess_dates(df: pd.DataFrame):
 
 def mika_proccess(X):
     X.loc[~X['accommadation_type_name'].isin(['Hotel', 'Apartment']), 'accommadation_type_name'] = np.nan
-    X.loc[
-        ~X['guest_nationality_country_name'].isin(
-            _guest_nationality_countries_to_keep), 'guest_nationality_country_name'] = np.nan
-
-    X.loc[
-        ~X['origin_country_code'].isin(
-            _countries_to_keep), 'origin_country_code'] = np.nan
-
-    X.loc[
-        ~X['hotel_id'].isin(
-            _hotel_ids_to_keep), 'hotel_id'] = np.nan
-
-    X.loc[~X['h_customer_id'].isin(
-        _problematic_cust), 'h_customer_id'] = 0
-    X.loc[
-        X['h_customer_id'].isin(
-            _problematic_cust), 'h_customer_id'] = 1
-
-    X.loc[
-        ~X['hotel_city_code'].isin(
-            _hotel_city_code_to_keep), 'hotel_city_code'] = np.nan
+    X.loc[~X['guest_nationality_country_name'].isin(
+        _guest_nationality_countries_to_keep), 'guest_nationality_country_name'] = np.nan
+    X.loc[~X['origin_country_code'].isin(_countries_to_keep), 'origin_country_code'] = np.nan
+    X.loc[~X['hotel_id'].isin(_hotel_ids_to_keep), 'hotel_id'] = np.nan
+    X.loc[~X['h_customer_id'].isin(_problematic_cust), 'h_customer_id'] = 0
+    X.loc[X['h_customer_id'].isin(_problematic_cust), 'h_customer_id'] = 1
+    X.loc[~X['hotel_city_code'].isin(_hotel_city_code_to_keep), 'hotel_city_code'] = np.nan
 
 
 def preprocess_data(X: pd.DataFrame):
