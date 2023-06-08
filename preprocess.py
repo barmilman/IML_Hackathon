@@ -70,16 +70,16 @@ def load_data(filename: str) -> pd.DataFrame:
 
 
 def add_extra_features(X: pd.DataFrame):
-    X['order_canceled'] = np.where(df['cancellation_datetime'].isna(), 0, 1)
+    X['order_canceled'] = np.where(X['cancellation_datetime'].isna(), 0, 1)
     X['duration_days'] = (X['checkin_date'] - X['checkout_date']).dt.days
     X['booked_days_before'] = (X['booking_datetime'] - X['checkin_date']).dt.days
-    X['cancel_code_day_one'] = df.apply(lambda row: parse_code_day_one(row['cancellation_policy_code']), axis=1)
-    X['cancel_code_return_one'] = df.apply(
+    X['cancel_code_day_one'] = X.apply(lambda row: parse_code_day_one(row['cancellation_policy_code']), axis=1)
+    X['cancel_code_return_one'] = X.apply(
         lambda row: parse_code_return_one(row['cancellation_policy_code'], row['duration_days']), axis=1)
-    X['cancel_code_day_two'] = df.apply(lambda row: parse_code_day_two(row['cancellation_policy_code']), axis=1)
-    X['cancel_code_return_two'] = df.apply(
+    X['cancel_code_day_two'] = X.apply(lambda row: parse_code_day_two(row['cancellation_policy_code']), axis=1)
+    X['cancel_code_return_two'] = X.apply(
         lambda row: parse_code_return_two(row['cancellation_policy_code'], row['duration_days']), axis=1)
-    X['parse_code_no_show'] = df.apply(
+    X['parse_code_no_show'] = X.apply(
         lambda row: parse_code_no_show(row['cancellation_policy_code'], row['duration_days']), axis=1)
 
 
@@ -156,15 +156,16 @@ def proccess_dates(df: pd.DataFrame):
 def preprocess_data(X: pd.DataFrame, is_test=False):
     if not is_test:
         X = X.drop_duplicates()
-
+    len(X)
     proccess_dates(X)
     add_extra_features(X)
+
     X.drop(_dates, axis=1, inplace=True)
     X.drop(_irrelevant_features, axis=1, inplace=True)
 
     X.replace(["UNKNOWN"], np.nan)
-    for label in X:  # Replaces invalid values with temporary nan value
-        X[label] = X[label].mask(~X[label].between(X[label][0], X[label][1], inclusive="both"), np.nan)
+    # for label in X:  # Replaces invalid values with temporary nan value
+    #     X[label] = X[label].mask(~X[label].between(X[label][0], X[label][1], inclusive="both"), np.nan)
 
     for category in _categorial_features:  # Handles categorial features
         X[category] = X[category].astype('category')
