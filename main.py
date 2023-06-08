@@ -1,7 +1,8 @@
 import task_1
 import task_2
-from classification import Classification, Regression
+from classification import Classification
 from data_handler import load_data, split_data
+from regression import Regression
 
 if __name__ == "__main__":
     file_path = './data_files/agoda_cancellation_train.csv'
