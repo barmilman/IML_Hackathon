@@ -235,11 +235,9 @@ class Classification:
         print("F1 score: {:.3f}".format(f1_score(y_test, ada_pred)))
         print(confusion_matrix(y_test, ada_pred))
 
-
     def gbc(self, X_train, y_train, X_test, y_test):
         clf = HistGradientBoostingClassifier()
         clf.fit(X_train, y_train)
-
 
         clf_pred = clf.predict(X_test)
         scores = cross_val_score(clf, X_train, y_train, cv=5)
@@ -247,7 +245,6 @@ class Classification:
         print("Test accuracy: {:.3f}".format(clf.score(X_test, y_test)))
         print("F1 score: {:.3f}".format(f1_score(y_test, clf_pred)))
         print(confusion_matrix(y_test, clf_pred))
-
 
     def data_scaling(self, X_train, X_test):
         std_scaler = StandardScaler()
@@ -261,9 +258,8 @@ class Classification:
         X_test_mm = mm_scaler.transform(X_test)
         return X_train_std, X_test_std, X_train_mm, X_test_mm
 
-
     def run_all(self, X_train, y_train, X_test, y_test):
-        X_train_std, X_test_std, X_train_mm, X_test_mm = self.data_scaling(X_train, X_test)
+        # X_train_std, X_test_std, X_train_mm, X_test_mm = self.data_scaling(X_train, X_test)
         # print("logistic_regression:")
         # self.logistic_regression(X_train_mm, y_train, X_test_mm, y_test)
         # print("linear_svc:")
