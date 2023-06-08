@@ -10,7 +10,7 @@ if __name__ == "__main__":
     # Order Cancelation
     # df_cancel = load_data(file_path)
     # df_cancel = task_1.preprocess_data(df_cancel)
-    # train_df, test_df, validation_df = split_data(df_cancel)
+    # train_df, test_df = split_data(df_cancel)
     # train_df = train_df.drop_duplicates()
     #
     # X_Train = train_df.loc[:, ~train_df.columns.isin(["order_cancelled"])]
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     df_price.drop("cancellation_datetime", axis=1, inplace=True)
 
     df_price = task_2.preprocess_data(df_price)
-    train_df, test_df, validation_df = split_data(df_price)
+    train_df, test_df = split_data(df_price)
     train_df = train_df.drop_duplicates()
 
     X_Train = train_df.loc[:, ~train_df.columns.isin(["original_selling_amount"])]
