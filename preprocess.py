@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.io as pio
 from sklearn import preprocessing
-from sklearn.impute import KNNImputer
+from sklearn.impute import KNNImputer, SimpleImputer
 from sklearn.model_selection import train_test_split
 import re
 
@@ -15,6 +15,7 @@ _features = {"hotel_star_rating": (0, 5),
              "no_of_children": (0, 8),
              "no_of_extra_bed": (0, 4),
              "no_of_room": (1, 9)}
+
 # "request_latecheckin", "request_nonesmoke", "request_earlycheckin", "request_highfloor",
 _dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date", "cancellation_datetime"]
 _irrelevant_features = ["h_booking_id", "hotel_chain_code", "hotel_brand_code",
@@ -45,7 +46,9 @@ def _fill_missings_values(X: pd.DataFrame) -> pd.DataFrame:
         Design matrix of regression problem
     """
 
-    return KNNImputer(n_neighbors=2).fit_transform(X)
+    imp = SimpleImputer(missing_values=np.nan, strategy='mean')
+    imp.fit(X)
+    return imp.transform(X)
 
 
 def load_data(filename: str) -> pd.DataFrame:
@@ -150,13 +153,6 @@ def proccess_dates(df: pd.DataFrame):
         df[f"{label}_year"] = df[label].dt.year
 
 
-def encode_features(df: pd.DataFrame):
-    enc = preprocessing.OneHotEncoder()
-    enc.fit(df)
-    OneHotEncoder()
-    enc.transform([['female', 'from US', 'uses Safari'], ['male', 'from Europe', 'uses Safari']]).toarray()
-
-
 def preprocess_data(X: pd.DataFrame, y: typing.Optional[pd.Series] = None):
     """
     preprocess data
@@ -210,12 +206,13 @@ if __name__ == "__main__":
     # df.nunique
     from Classification import Classification
 
-    preprocess_data(df)
     train_df, test_df, validation_df = split_data(df)
     X_Train = train_df.loc[:, ~train_df.columns.isin(['order_canceled', ])]
     y_Train = train_df['order_canceled']
     X_Test = test_df.loc[:, ~test_df.columns.isin(['order_canceled', ])]
     y_Test = test_df['order_canceled']
+    X_Train, y_Train = preprocess_data(X_Train, y_Train)
+    X_Test = preprocess_data(X_Test)
 
     Classification().run_all(X_Train, y_Train, X_Test, y_Test)
     print(df.columns.tolist())
