@@ -38,7 +38,7 @@ def split_data(X: pd.DataFrame):
     return train_df, test_df, validation_df
 
 
-def _fill_missings_values(X: pd.DataFrame) -> pd.DataFrame:
+def _fill_missings_values(df: pd.DataFrame) -> pd.DataFrame:
     """
     fills missings values by prediction Parameters
     ----------
@@ -47,8 +47,11 @@ def _fill_missings_values(X: pd.DataFrame) -> pd.DataFrame:
     """
 
     imp = SimpleImputer(missing_values=np.nan, strategy='mean')
-    imp.fit(X)
-    return imp.transform(X)
+    idf = pd.DataFrame(imp.fit_transform(df))
+    idf.columns = df.columns
+    idf.index = df.index
+
+    return idf
 
 
 def load_data(filename: str) -> pd.DataFrame:
@@ -69,7 +72,7 @@ def load_data(filename: str) -> pd.DataFrame:
 
 def add_extra_features(X: pd.DataFrame):
     X['order_canceled'] = np.where(X['cancellation_datetime'].isna(), 0, 1)
-    X['duration_days'] = (X['checkin_date'] - X['checkout_date']).dt.days
+    X['duration_days'] = (X['checkout_date'] - X['checkin_date']).dt.days
     X['booked_days_before'] = (X['booking_datetime'] - X['checkin_date']).dt.days
     X['cancel_code_day_one'] = X.apply(lambda row: parse_code_day_one(row['cancellation_policy_code']), axis=1)
     X['cancel_code_return_one'] = X.apply(
@@ -159,7 +162,7 @@ def preprocess_data(X: pd.DataFrame):
     X.drop(_irrelevant_features, axis=1, inplace=True)
     X.drop("cancellation_policy_code", axis=1, inplace=True)
 
-    X.replace(["UNKNOWN"], np.nan)
+    X.replace(["UNKNOWN"], np.nan, inplace=True)
     # for label in X:  # Replaces invalid values with temporary nan value
     #     X[label] = X[label].mask(~X[label].between(X[label][0], X[label][1], inclusive="both"), np.nan)
 
@@ -167,10 +170,7 @@ def preprocess_data(X: pd.DataFrame):
         X[category] = X[category].astype('category')
         X = pd.get_dummies(X, prefix=category, columns=[category])
 
-    _fill_missings_values(X)
-
-    X = X.reset_index(drop=True)
-    return X
+    return _fill_missings_values(X)
 
 
 if __name__ == "__main__":
@@ -183,6 +183,9 @@ if __name__ == "__main__":
     from Classification import Classification
 
     df = preprocess_data(df)
+    print(df.head())
+    print(df.info)
+
     train_df, test_df, validation_df = split_data(df)
 
     train_df = train_df.drop_duplicates()
