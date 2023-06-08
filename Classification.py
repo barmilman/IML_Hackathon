@@ -51,6 +51,7 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler, MinMaxScaler
 from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.metrics import f1_score, confusion_matrix
+from sklearn.svm import SVC
 
 from sklearn.linear_model import LogisticRegression, RidgeClassifier, SGDClassifier
 from sklearn.svm import LinearSVC
@@ -116,7 +117,7 @@ class Classification:
     def knn(self, X_train, y_train, X_test, y_test):
         training_accuracy = []
         test_accuracy = []
-        neighbors_settings = range(1, 6)
+        neighbors_settings = range(1, 8)
         for n_neighbors in neighbors_settings:
             knn = KNeighborsClassifier(n_neighbors=n_neighbors)
             knn.fit(X_train, y_train)
@@ -168,7 +169,7 @@ class Classification:
         self.classifier(X_train_select, y_train, X_test_select, y_test, model, param_grid)
 
     def random_forest(self, X_train, y_train, X_test, y_test):
-        param_grid = {'n_estimators': [50, 75, 100], 'max_depth': [1, 2, 5]}
+        param_grid = {'n_estimators': [50, 75, 100, 125, 150, 175, 200], 'max_depth': [1, 2, 5, 7]}
         self.run_model(RandomForestClassifier(), RandomForestClassifier(n_estimators=50, max_depth=2), param_grid,
                        X_train, y_train, X_test, y_test)
 
@@ -197,7 +198,12 @@ class Classification:
         print(confusion_matrix(y_test, mlp_pred))
 
     def adaboost(self, X_train, y_train, X_test, y_test):
-        ada = AdaBoostClassifier()
+        base_estimator = DecisionTreeClassifier(max_depth=1)  # Shallow decision tree
+        n_estimators = 50  # Number of weak learners
+        learning_rate = 1.0  # Learning rate
+
+        ada = AdaBoostClassifier(base_estimator=base_estimator, n_estimators=n_estimators,
+                                 learning_rate=learning_rate)
         ada.fit(X_train, y_train)
         ada_pred = ada.predict(X_test)
         scores = cross_val_score(ada, X_train, y_train, cv=5)
@@ -205,6 +211,9 @@ class Classification:
         print("Test accuracy: {:.3f}".format(ada.score(X_test, y_test)))
         print("F1 score: {:.3f}".format(f1_score(y_test, ada_pred)))
         print(confusion_matrix(y_test, ada_pred))
+
+    def gbc(self, X_train, y_train, X_test, y_test):
+
 
     def data_scaling(self, X_train, X_test):
         std_scaler = StandardScaler()
@@ -232,13 +241,13 @@ class Classification:
         # self.knn(X_train, y_train, X_test, y_test)
         # print("decision_tree")
         # self.decision_tree( X_train, y_train, X_test, y_test)
-        print("random_forest:")
-        self.random_forest(X_train, y_train, X_test, y_test)
-        print("gradient_boosted_classifier:")
-        self.gradient_boosted_classifier(X_train, y_train, X_test, y_test)
+        # print("random_forest:")
+        # self.random_forest(X_train, y_train, X_test, y_test)
+        # print("gradient_boosted_classifier:")
+        # self.gradient_boosted_classifier(X_train, y_train, X_test, y_test)
         # print("naive_bayes:")
         # self.naive_bayes(X_train, y_train, X_test, y_test)
         # print("multi_layer_perceptron:")
         # self.multi_layer_perceptron(X_train_std, y_train, X_test_std, y_test)
-        # print("adaboost:")
-        # self.adaboost(X_train, y_train, X_test, y_test)
+        print("adaboost:")
+        self.adaboost(X_train, y_train, X_test, y_test)
