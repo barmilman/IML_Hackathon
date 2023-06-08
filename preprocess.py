@@ -17,8 +17,8 @@ _features = {"hotel_star_rating": (0, 5),
              "no_of_room": (1, 9)}
 
 # "request_latecheckin", "request_nonesmoke", "request_earlycheckin", "request_highfloor",
-_dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date", "cancellation_datetime"]
-_irrelevant_features = ["h_booking_id", "hotel_chain_code", "hotel_brand_code",
+_dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date"]
+_irrelevant_features = ["h_booking_id", "hotel_chain_code", "hotel_brand_code","cancellation_datetime",
                         "hotel_id", "h_customer_id", "hotel_area_code"]
 _categorial_features = ["hotel_country_code", "accommadation_type_name", "charge_option", "language",
                         "customer_nationality", "guest_nationality_country_name", "origin_country_code",
