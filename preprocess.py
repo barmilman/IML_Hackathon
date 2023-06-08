@@ -18,7 +18,7 @@ _features = {"hotel_star_rating": (0, 5),
 
 _dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date", "cancellation_datetime"]
 _irrelevant_features = ["h_booking_id", "hotel_chain_code", "hotel_brand_code", "request_earlycheckin",
-                         "request_twinbeds", "request_largebed", "request_highfloor",
+                        "request_largebed", "request_highfloor",
                         "hotel_id", "h_customer_id", "request_latecheckin", "request_nonesmoke", "hotel_area_code"]
 _categorial_features = ["hotel_country_code", "accommadation_type_name", "charge_option", "language",
                         "customer_nationality", "guest_nationality_country_name", "origin_country_code",
