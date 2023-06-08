@@ -18,7 +18,7 @@ _features = {"hotel_star_rating": (0, 5),
 
 _dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date", "cancellation_datetime"]
 _irrelevant_features = ["h_booking_id", "hotel_chain_code", "hotel_brand_code", "request_earlycheckin",
-                        "request_largebed", "request_highfloor",
+                         "request_highfloor",
                         "hotel_id", "h_customer_id", "request_latecheckin", "request_nonesmoke", "hotel_area_code"]
 _categorial_features = ["hotel_country_code", "accommadation_type_name", "charge_option", "language",
                         "customer_nationality", "guest_nationality_country_name", "origin_country_code",
@@ -210,13 +210,12 @@ if __name__ == "__main__":
     # df.nunique
     from Classification import Classification
 
+    preprocess_data(df)
     train_df, test_df, validation_df = split_data(df)
     X_Train = train_df.loc[:, ~train_df.columns.isin(['order_canceled', ])]
     y_Train = train_df['order_canceled']
     X_Test = test_df.loc[:, ~test_df.columns.isin(['order_canceled', ])]
     y_Test = test_df['order_canceled']
-    preprocess_data(X_Train, y_Train)
-    preprocess_data(X_Test)
 
     Classification().run_all(X_Train, y_Train, X_Test, y_Test)
     print(df.columns.tolist())
