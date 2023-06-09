@@ -8,5 +8,3 @@ Files:
     pca.py - Runs the pca algorithm.
     main.py - Runs the executable code.
     regression.py - Class of many regressors.
-    
-    
