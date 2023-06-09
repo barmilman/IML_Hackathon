@@ -10,12 +10,6 @@ _problematic_cust = [3403039646291800000, 989627699560000000, 609680085364002009
                      8370707232058280048]
 _hotel_city_code_to_keep = [220, 1403, 142, 2249, 2224, 2797]
 
-_features = {"hotel_star_rating": (0, 5),
-             "no_of_adults": (1, 19),
-             "no_of_children": (0, 8),
-             "no_of_extra_bed": (0, 4),
-             "no_of_room": (1, 9)}
-
 # "request_latecheckin", "request_nonesmoke", "request_earlycheckin", "request_highfloor",
 _dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date"]
 _irrelevant_features = ["hotel_chain_code", "hotel_brand_code", "hotel_area_code"]
@@ -144,8 +138,6 @@ def preprocess_data(X: pd.DataFrame, include_cancellation: bool):
 
     X.replace(["UNKNOWN"], np.nan, inplace=True)
     mika_proccess(X)
-    # for label in X:  # Replaces invalid values with temporary nan value
-    #     X[label] = X[label].mask(~X[label].between(X[label][0], X[label][1], inclusive="both"), np.nan)
 
     for category in _categorial_features:  # Handles categorial features
         X[category] = X[category].astype('category')

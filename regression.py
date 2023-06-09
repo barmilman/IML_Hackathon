@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import StandardScaler
 
 
 class Regression:
@@ -77,14 +78,9 @@ class Regression:
         model.fit(X_train, y_train)
 
         pred_train = model.predict(X_train)
-        print(f"Train MSE: {np.sqrt(mean_squared_error(y_train, pred_train))}")
-        print(f"Train R2_Score: {r2_score(y_train, pred_train)}")
-
         pred_test = model.predict(X_test)
-        print(f"Test MSE: {np.sqrt(mean_squared_error(y_test, pred_test))}")
-        print(f"Test R2_Score: {r2_score(y_test, pred_test)}")
 
-        return model
+        return pred_test
 
     def mlp_regressor(self, X_train, y_train, X_test, y_test):
         from sklearn.neural_network import MLPRegressor
@@ -105,11 +101,22 @@ class Regression:
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
 
-        if y_test:
-            print(f"Test MSE: {np.sqrt(mean_squared_error(y_test, y_pred))}")
-            print(f"Test R2_Score: {r2_score(y_test, y_pred)}")
-
         return y_pred
+
+    def data_scalling(self, X_Train, y_Train, X_Test, y_Test):
+        transformer_x = StandardScaler()
+        transformer_x.fit(X_Train)
+        transformer_y = StandardScaler()
+        transformer_y.fit(y_Train.to_numpy().reshape(-1, 1))
+        X_rtrain = transformer_x.transform(X_Train)
+        y_rtrain = transformer_y.transform(y_Train.to_numpy().reshape(-1, 1))
+        X_rtest = transformer_x.transform(X_Test)
+        y_rtest = transformer_y.transform(y_Test.to_numpy().reshape(-1, 1))
+
+        # y_pred_unsacled = transformer_y.inverse_transform(y_pred.reshape(-1, 1))
+        # y_Test_unsacled = transformer_y.inverse_transform(y_rtest)
+
+        # return y_pred_unsacled, y_Test_unsacled
 
     def run_all(self, X_Train, y_Train, X_Test, y_Test=None):
         print("gbr:")

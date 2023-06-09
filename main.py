@@ -1,4 +1,7 @@
+import numpy as np
 import pandas as pd
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import RobustScaler, StandardScaler
 
 import task_1
 import task_2
@@ -11,17 +14,17 @@ def temp():
     file_path = './data_files/agoda_cancellation_train.csv'
 
     # Order Cancelation
-    df_cancel = load_data(file_path, True)
-    df_cancel = task_1.preprocess_data(df_cancel, True)
-    train_df, test_df = split_data(df_cancel)
-    train_df = train_df.drop_duplicates()
-
-    X_Train = train_df.loc[:, ~train_df.columns.isin(["order_cancelled"])]
-    y_Train = train_df["order_cancelled"]
-    X_Test = test_df.loc[:, ~test_df.columns.isin(["order_cancelled"])]
-    y_Test = test_df["order_cancelled"]
-
-    Classification().run_all(X_Train, y_Train, X_Test, y_Test)
+    # df_cancel = load_data(file_path, True)
+    # df_cancel = task_1.preprocess_data(df_cancel, True)
+    # train_df, test_df = split_data(df_cancel)
+    # train_df = train_df.drop_duplicates()
+    #
+    # X_Train = train_df.loc[:, ~train_df.columns.isin(["order_cancelled"])]
+    # y_Train = train_df["order_cancelled"]
+    # X_Test = test_df.loc[:, ~test_df.columns.isin(["order_cancelled"])]
+    # y_Test = test_df["order_cancelled"]
+    #
+    # Classification().run_all(X_Train, y_Train, X_Test, y_Test)
 
     # Price
     df_price = load_data(file_path, True)
@@ -35,7 +38,10 @@ def temp():
     X_Test = test_df.loc[:, ~test_df.columns.isin(["original_selling_amount"])]
     y_Test = test_df["original_selling_amount"]
 
-    Regression().run_all(X_Train, y_Train, X_Test, y_Test)
+    y_pred = Regression().run_all(X_Train, y_Train, X_Test, y_Test)
+
+    print(f"Test MSE: {np.sqrt(mean_squared_error(y_Test, y_pred))}")
+    print(f"Test R2_Score: {r2_score(y_Test, y_pred)}")
 
 
 if __name__ == "__main__":

@@ -198,13 +198,12 @@ class Classification:
         scores = cross_val_score(clf, X_train, y_train, cv=5)
         print("Average cross validation score: {:.3f}".format(scores.mean()))
 
-        if y_test:
+        if y_test is not None:
             print("Test accuracy: {:.3f}".format(clf.score(X_test, y_test)))
             print("F1 score: {:.3f}".format(f1_score(y_test, clf_pred, average="macro")))
             print(confusion_matrix(y_test, clf_pred))
 
         return clf_pred
-
 
     def data_scaling(self, X_train, X_test):
         std_scaler = StandardScaler()
