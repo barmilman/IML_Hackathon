@@ -1,146 +1,46 @@
-import numpy as np
 import pandas as pd
-from sklearn.impute import KNNImputer, SimpleImputer
-import re
 
-_countries_to_keep = ["KR", "MY", "TH", "TW", "HK", "ID", "PK", "RU"]
-_guest_nationality_countries_to_keep = ["South Korea", "Malaysia", "Taiwan", "Thailand", "Hong Kong", "Indonesia"]
-_hotel_ids_to_keep = [6452, 3098648, 3080111, 1629394]
-_problematic_cust = [3403039646291800000, 989627699560000000, 6096800853640020093, 6754714678033050058,
-                     8370707232058280048]
-_hotel_city_code_to_keep = [220, 1403, 142, 2249, 2224, 2797]
-
-# "request_latecheckin", "request_nonesmoke", "request_earlycheckin", "request_highfloor",
-_dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date"]
-_irrelevant_features = ["hotel_chain_code", "hotel_brand_code", "hotel_area_code"]
-_categorial_features = ["hotel_country_code", "accommadation_type_name", "charge_option", "language",
-                        "customer_nationality", "guest_nationality_country_name", "origin_country_code",
-                        "original_payment_method", "original_payment_type", "original_payment_currency",
-                        "is_first_booking", "is_user_logged_in", "hotel_id", "h_customer_id", "hotel_city_code"]
+from classification import Classification
+from data_handler import DataHandler
+from preproccessing import Preproccessing
+from regression import Regression
 
 
-def fill_missings_values(df: pd.DataFrame) -> pd.DataFrame:
-    imp = SimpleImputer(missing_values=np.nan, strategy='mean')
-    idf = pd.DataFrame(imp.fit_transform(df))
-    idf.columns = df.columns
-    idf.index = df.index
+class Task2:
+    def __init__(self):
+        pass
 
-    return idf
+    def run(self, train_path, test_path):
+        preproccessing = Preproccessing()
+        data_handler = DataHandler()
 
+        train_df = data_handler.load_data(train_path, True)
+        train_df = preproccessing.preprocess_data(train_df, True)
+        train_df.drop("h_booking_id", axis=1, inplace=True)
+        train_df = train_df.drop_duplicates()
 
-def add_extra_features(X: pd.DataFrame, include_cancellation: bool):
-    if include_cancellation:
-        X['order_cancelled'] = np.where(X['cancellation_datetime'].isna(), 0, 1)
+        X_Train = train_df.loc[:, ~train_df.columns.isin(["order_cancelled"])]
+        y_Train = train_df["order_cancelled"]
+        test_df = data_handler.load_data(test_path, False)
+        test_df = preproccessing.preprocess_data(test_df, False)
+        test_df.drop("h_booking_id", axis=1, inplace=True)
+        test_df = test_df.reindex(columns=X_Train.columns, fill_value=0)
+        order_cancellations = Classification().run_all(X_Train, y_Train, test_df)
 
-    X['duration_days'] = (X['checkout_date'] - X['checkin_date']).dt.days
-    X['booked_days_before'] = (X['booking_datetime'] - X['checkin_date']).dt.days
-    X['cancel_code_day_one'] = X.apply(lambda row: parse_code_day_one(row['cancellation_policy_code']), axis=1)
-    X['cancel_code_return_one'] = X.apply(
-        lambda row: parse_code_return_one(row['cancellation_policy_code'], row['duration_days']), axis=1)
-    X['cancel_code_day_two'] = X.apply(lambda row: parse_code_day_two(row['cancellation_policy_code']), axis=1)
-    X['cancel_code_return_two'] = X.apply(
-        lambda row: parse_code_return_two(row['cancellation_policy_code'], row['duration_days']), axis=1)
-    X['parse_code_no_show'] = X.apply(
-        lambda row: parse_code_no_show(row['cancellation_policy_code'], row['duration_days']), axis=1)
+        X_Train = train_df.loc[:, ~train_df.columns.isin(["original_selling_amount"])]
+        y_Train = train_df["original_selling_amount"]
+        test_df = data_handler.load_data(test_path, False)
+        test_df["order_cancelled"] = order_cancellations
+        test_df = preproccessing.preprocess_data(test_df, False)
+        test_booking_ids = test_df["h_booking_id"]
+        test_booking_ids.name = "id"
+        test_df.drop("h_booking_id", axis=1, inplace=True)
+        test_df = test_df.reindex(columns=X_Train.columns, fill_value=0)
+        y_pred = pd.Series(Regression().run_all(X_Train, y_Train, test_df))
+        y_pred[y_pred < 1] = 1
+        y_pred.reindex(test_df.index)
+        y_pred[test_df["order_cancelled"] == 0] = -1
+        y_pred.name = "predicted_selling_amount"
+        df2 = pd.concat([test_booking_ids, y_pred], axis=1)
 
-
-def parse_code_day_one(row):
-    numeric_values = re.findall(r'\d+', row)
-    alphabetic_substrings = re.findall(r'[a-zA-Z]+', row)
-    try:
-        if alphabetic_substrings[0] == 'D':
-            return float(numeric_values[0])
-    except:
-        return 0
-    return 0
-
-
-def parse_code_return_one(row, days):
-    numeric_values = re.findall(r'\d+', row)
-    alphabetic_substrings = re.findall(r'[a-zA-Z]+', row)
-    try:
-        if alphabetic_substrings[1] == 'P':
-            return float(numeric_values[1]) / 100
-        elif alphabetic_substrings[1] == 'N':
-            return float(numeric_values[1]) / days
-        else:
-            return 0
-    except:
-        return 0
-
-
-def parse_code_day_two(row):
-    numeric_values = re.findall(r'\d+', row)
-    alphabetic_substrings = re.findall(r'[a-zA-Z]+', row)
-    try:
-        if alphabetic_substrings[2] == 'D':
-            return float(numeric_values[2])
-    except:
-        return 0
-    return 0
-
-
-def parse_code_return_two(row, days):
-    numeric_values = re.findall(r'\d+', row)
-    alphabetic_substrings = re.findall(r'[a-zA-Z]+', row)
-    try:
-        if alphabetic_substrings[3] == 'P':
-            return float(numeric_values[1]) / 100
-        elif alphabetic_substrings[3] == 'N':
-            return float(numeric_values[1]) / days
-        else:
-            return 0
-    except:
-        return 0
-
-
-def parse_code_no_show(row, days):
-    numeric_values = re.findall(r'\d+', row)
-    alphabetic_substrings = re.findall(r'[a-zA-Z]+', row)
-    try:
-        if len(alphabetic_substrings) % 2 != 0:
-            if alphabetic_substrings[-1] == 'P':
-                return float(numeric_values[-1]) / 100
-            if alphabetic_substrings[-1] == 'N':
-                return float(numeric_values[1]) / days
-        return 0
-    except:
-        return 0
-
-
-def proccess_dates(df: pd.DataFrame):
-    for label in _dates:
-        df[f"{label}_dayofyear"] = df[label].dt.dayofyear
-        df[f"{label}_year"] = df[label].dt.year
-
-
-def mika_proccess(X):
-    X.loc[~X['accommadation_type_name'].isin(['Hotel', 'Apartment']), 'accommadation_type_name'] = np.nan
-    X.loc[~X['guest_nationality_country_name'].isin(
-        _guest_nationality_countries_to_keep), 'guest_nationality_country_name'] = np.nan
-    X.loc[~X['origin_country_code'].isin(_countries_to_keep), 'origin_country_code'] = np.nan
-    X.loc[~X['hotel_id'].isin(_hotel_ids_to_keep), 'hotel_id'] = np.nan
-    X.loc[~X['h_customer_id'].isin(_problematic_cust), 'h_customer_id'] = 0
-    X.loc[X['h_customer_id'].isin(_problematic_cust), 'h_customer_id'] = 1
-    X.loc[~X['hotel_city_code'].isin(_hotel_city_code_to_keep), 'hotel_city_code'] = np.nan
-
-
-def preprocess_data(X: pd.DataFrame, include_cancellation: bool):
-    proccess_dates(X)
-    add_extra_features(X, include_cancellation)
-
-    X.drop(_dates, axis=1, inplace=True)
-    if include_cancellation:
-        X.drop("cancellation_datetime", axis=1, inplace=True)
-
-    X.drop(_irrelevant_features, axis=1, inplace=True)
-    X.drop("cancellation_policy_code", axis=1, inplace=True)
-
-    X.replace(["UNKNOWN"], np.nan, inplace=True)
-    mika_proccess(X)
-
-    for category in _categorial_features:  # Handles categorial features
-        X[category] = X[category].astype('category')
-        X = pd.get_dummies(X, prefix=category, columns=[category])
-
-    return fill_missings_values(X)
+        df2.to_csv("agoda_cost_cancellation.csv")
