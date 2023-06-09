@@ -119,5 +119,4 @@ class Regression:
         # return y_pred_unsacled, y_Test_unsacled
 
     def run_all(self, X_Train, y_Train, X_Test, y_Test=None):
-        print("gbr:")
         return self.gbr(X_Train, y_Train, X_Test, y_Test)

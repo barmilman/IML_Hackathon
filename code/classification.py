@@ -30,7 +30,8 @@ class Classification:
         print(confusion_matrix(y_test, logreg_pred))
 
     def linear_svc(self, X_train_mm, y_train, X_test_mm, y_test):
-        svc = LinearSVC().fit(X_train_mm, y_train)
+        svc = LinearSVC()
+        svc.fit(X_train_mm, y_train)
         scores = cross_val_score(svc, X_train_mm, y_train, cv=5)
         svc_pred = svc.predict(X_test_mm)
         print("Average cross validation score: {:.3f}".format(scores.mean()))
@@ -39,7 +40,8 @@ class Classification:
         print(confusion_matrix(y_test, svc_pred))
 
     def sgd(self, X_train_std, y_train, X_test_std, y_test):
-        sgd = SGDClassifier(alpha=0.1).fit(X_train_std, y_train)
+        sgd = SGDClassifier(alpha=0.1)
+        sgd.fit(X_train_std, y_train)
         scores = cross_val_score(sgd, X_train_std, y_train, cv=5)
         sgd_pred = sgd.predict(X_test_std)
         print("Average cross validation score: {:.3f}".format(scores.mean()))
@@ -197,10 +199,11 @@ class Classification:
         clf.fit(X_train, y_train)
 
         clf_pred = clf.predict(X_test)
-        scores = cross_val_score(clf, X_train, y_train, cv=5)
-        print("Average cross validation score: {:.3f}".format(scores.mean()))
 
         if y_test is not None:
+            scores = cross_val_score(clf, X_train, y_train, cv=5)
+            print("Average cross validation score: {:.3f}".format(scores.mean()))
+
             print("Test accuracy: {:.3f}".format(clf.score(X_test, y_test)))
             print("F1 score: {:.3f}".format(f1_score(y_test, clf_pred, average="macro")))
             print(confusion_matrix(y_test, clf_pred))
@@ -254,12 +257,9 @@ class Classification:
         # self.multi_layer_perceptron(X_train_std, y_train, X_test_std, y_test)
         # print("adaboost:")
         # self.adaboost(X_train, y_train, X_test, y_test)
-
         # print("lasso:")
         # self.lasso(X_train, y_train, X_test, y_test)
-
-        print("gbc:")
-        return self.gbc(X_train, y_train, X_test, y_test)
-
         # print("elastic_net:")
         # self.elastic_net(X_train, y_train, X_test, y_test)
+
+        return self.gbc(X_train, y_train, X_test, y_test)

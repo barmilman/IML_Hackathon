@@ -1,6 +1,6 @@
+import plots
 import task_1
 import task_2
-import task_3
 from data_handler import DataHandler
 from preproccessing import Preproccessing
 
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     task_2 = task_2.Task2()
     task_2.run(train_path, test2_path)
 
-    # Question 3 + 4
+    # Questions 3 + 4 - Plots
     preproccessing = Preproccessing()
     data_handler = DataHandler()
 
@@ -26,5 +26,4 @@ if __name__ == "__main__":
     train_df.drop("h_booking_id", axis=1, inplace=True)
     train_df = train_df.drop_duplicates()
 
-    task_3 = task_3.Task3()
-    task_3.run(train_df)
+    plots.create(train_df)

@@ -19,6 +19,7 @@ _categorial_features = ["hotel_country_code", "accommadation_type_name", "charge
                         "is_first_booking", "is_user_logged_in", "hotel_id", "h_customer_id", "hotel_city_code"]
 
 
+
 class Preproccessing:
     def __init__(self):
         pass
@@ -138,4 +139,5 @@ class Preproccessing:
             X[category] = X[category].astype('category')
             X = pd.get_dummies(X, prefix=category, columns=[category])
 
+        X['h_booking_id'] = X['h_booking_id'].fillna(0)
         return self.fill_missings_values(X)

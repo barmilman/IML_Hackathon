@@ -10,6 +10,12 @@ class Task1:
         pass
 
     def run(self, train_path, test_path):
+        try:
+            self._run_unsafe(train_path, test_path)
+        except:
+            return
+
+    def _run_unsafe(self, train_path, test_path):
         preproccessing = Preproccessing()
         data_handler = DataHandler()
 
