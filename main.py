@@ -1,13 +1,11 @@
 import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.preprocessing import RobustScaler, StandardScaler
 
-import task_1
-import task_2
-from classification import Classification
-from data_handler import load_data, split_data
-from regression import Regression
+from code import task_1, task_2
+from code.classification import Classification
+from code.data_handler import load_data, split_data
+from code.regression import Regression
 
 
 def temp():

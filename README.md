@@ -1,6 +1,12 @@
 # iml_hacktahon
 
-
-[https://code-with-me.global.jetbrains.com/m1OIjBxWVGUVkbQ5kLsyHw#p=PY&fp=279590C52B4B7DE5021507A288478E63207C9A741690AAFDE3E6A96AD54E9D02
-](https://code-with-me.global.jetbrains.com/6mlKguZSI2g3ytaIJOWPmw#p=PY&fp=4B78291421EE37061162276E334DCC114BD23F8A12BF2C94184FB417FA17379B)
-
+Files:
+    agoda_cancellation_prediction.csv - The predicted cancellation values.
+    agoda_cost_cancellation.csv - The predicted cancellation cost.
+    classification.py - Class of classifiers.
+    data_handler.py - loading and spliting data.
+    pca.py - runs pca algorithm.
+    main.py - runs the executable code.
+    regression.py - Class of regressors.
+    
+    

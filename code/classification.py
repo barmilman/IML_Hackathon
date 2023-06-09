@@ -5,13 +5,15 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier,
 from sklearn.feature_selection import SelectFromModel
 from sklearn.linear_model import LogisticRegression, RidgeClassifier, SGDClassifier, ElasticNet, Lasso
 from sklearn.metrics import f1_score, confusion_matrix, mean_squared_error, r2_score
-from sklearn.model_selection import cross_val_score, GridSearchCV
+from sklearn.model_selection import cross_val_score, GridSearchCV, RandomizedSearchCV
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.svm import LinearSVC
 from sklearn.tree import DecisionTreeClassifier
+from scipy.stats import uniform as sp_randFloat
+from scipy.stats import randint as sp_randInt
 
 
 class Classification:
@@ -216,6 +218,17 @@ class Classification:
         X_train_mm = mm_scaler.transform(X_train)
         X_test_mm = mm_scaler.transform(X_test)
         return X_train_std, X_test_std, X_train_mm, X_test_mm
+
+    def gdr_model_selection(self, X_train, y_train):
+        param_dist = {'learning_rate': sp_randFloat(),
+                      'max_depth': sp_randInt(3, 6),
+                      'max_iter': sp_randInt(100, 300), }
+        model = HistGradientBoostingClassifier()
+
+        random_search = RandomizedSearchCV(model, param_dist, n_iter=10, cv=5)
+        random_search.fit(X_train, y_train)
+        best_params = random_search.best_params_
+        print(best_params)
 
     def run_all(self, X_train, y_train, X_test, y_test=None):
         # X_train_std, X_test_std, X_train_mm, X_test_mm = self.data_scaling(X_train, X_test)
