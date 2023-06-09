@@ -17,8 +17,8 @@ _features = {"hotel_star_rating": (0, 5),
              "no_of_room": (1, 9)}
 
 # "request_latecheckin", "request_nonesmoke", "request_earlycheckin", "request_highfloor",
-_dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date", "cancellation_datetime"]
-_irrelevant_features = ["h_booking_id", "hotel_chain_code", "hotel_brand_code", "hotel_area_code"]
+_dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date"]
+_irrelevant_features = ["hotel_chain_code", "hotel_brand_code", "hotel_area_code"]
 _categorial_features = ["hotel_country_code", "accommadation_type_name", "charge_option", "language",
                         "customer_nationality", "guest_nationality_country_name", "origin_country_code",
                         "original_payment_method", "original_payment_type", "original_payment_currency",
@@ -34,8 +34,10 @@ def fill_missings_values(df: pd.DataFrame) -> pd.DataFrame:
     return idf
 
 
-def add_extra_features(X: pd.DataFrame):
-    X['order_cancelled'] = np.where(X['cancellation_datetime'].isna(), 0, 1)
+def add_extra_features(X: pd.DataFrame, include_cancellation: bool):
+    if include_cancellation:
+        X['order_cancelled'] = np.where(X['cancellation_datetime'].isna(), 0, 1)
+
     X['duration_days'] = (X['checkout_date'] - X['checkin_date']).dt.days
     X['booked_days_before'] = (X['booking_datetime'] - X['checkin_date']).dt.days
     X['cancel_code_day_one'] = X.apply(lambda row: parse_code_day_one(row['cancellation_policy_code']), axis=1)
@@ -114,9 +116,6 @@ def parse_code_no_show(row, days):
 
 def proccess_dates(df: pd.DataFrame):
     for label in _dates:
-        if label == "cancellation_datetime":
-            continue
-
         df[f"{label}_dayofyear"] = df[label].dt.dayofyear
         df[f"{label}_year"] = df[label].dt.year
 
@@ -132,11 +131,14 @@ def mika_proccess(X):
     X.loc[~X['hotel_city_code'].isin(_hotel_city_code_to_keep), 'hotel_city_code'] = np.nan
 
 
-def preprocess_data(X: pd.DataFrame):
+def preprocess_data(X: pd.DataFrame, include_cancellation: bool):
     proccess_dates(X)
-    add_extra_features(X)
+    add_extra_features(X, include_cancellation)
 
     X.drop(_dates, axis=1, inplace=True)
+    if include_cancellation:
+        X.drop("cancellation_datetime", axis=1, inplace=True)
+        
     X.drop(_irrelevant_features, axis=1, inplace=True)
     X.drop("cancellation_policy_code", axis=1, inplace=True)
 

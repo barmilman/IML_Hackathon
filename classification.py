@@ -190,19 +190,21 @@ class Classification:
         print("F1 score: {:.3f}".format(f1_score(y_test, ada_pred, average="macro")))
         print(confusion_matrix(y_test, ada_pred))
 
-    def gbc(self, X_train, y_train, X_test, y_test):
-        print(y_test.head())
-        print(y_train.head())
-
+    def gbc(self, X_train, y_train, X_test, y_test=None):
         clf = HistGradientBoostingClassifier()
         clf.fit(X_train, y_train)
 
         clf_pred = clf.predict(X_test)
         scores = cross_val_score(clf, X_train, y_train, cv=5)
         print("Average cross validation score: {:.3f}".format(scores.mean()))
-        print("Test accuracy: {:.3f}".format(clf.score(X_test, y_test)))
-        print("F1 score: {:.3f}".format(f1_score(y_test, clf_pred, average="macro")))
-        print(confusion_matrix(y_test, clf_pred))
+
+        if y_test:
+            print("Test accuracy: {:.3f}".format(clf.score(X_test, y_test)))
+            print("F1 score: {:.3f}".format(f1_score(y_test, clf_pred, average="macro")))
+            print(confusion_matrix(y_test, clf_pred))
+
+        return clf_pred
+
 
     def data_scaling(self, X_train, X_test):
         std_scaler = StandardScaler()
@@ -216,7 +218,7 @@ class Classification:
         X_test_mm = mm_scaler.transform(X_test)
         return X_train_std, X_test_std, X_train_mm, X_test_mm
 
-    def run_all(self, X_train, y_train, X_test, y_test):
+    def run_all(self, X_train, y_train, X_test, y_test=None):
         # X_train_std, X_test_std, X_train_mm, X_test_mm = self.data_scaling(X_train, X_test)
         # print("logistic_regression:")
         # self.logistic_regression(X_train_mm, y_train, X_test_mm, y_test)
@@ -245,7 +247,7 @@ class Classification:
         # self.lasso(X_train, y_train, X_test, y_test)
 
         print("gbc:")
-        self.gbc(X_train, y_train, X_test, y_test)
+        return self.gbc(X_train, y_train, X_test, y_test)
 
         # print("elastic_net:")
         # self.elastic_net(X_train, y_train, X_test, y_test)

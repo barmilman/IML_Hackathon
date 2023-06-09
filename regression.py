@@ -98,16 +98,19 @@ class Regression:
 
         return model
 
-    def gbr(self, X_train, y_train, X_test, y_test):
+    def gbr(self, X_train, y_train, X_test, y_test=None):
         from sklearn.ensemble import HistGradientBoostingRegressor
 
         model = HistGradientBoostingRegressor()
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
 
-        print(f"Test MSE: {np.sqrt(mean_squared_error(y_test, y_pred))}")
-        print(f"Test R2_Score: {r2_score(y_test, y_pred)}")
+        if y_test:
+            print(f"Test MSE: {np.sqrt(mean_squared_error(y_test, y_pred))}")
+            print(f"Test R2_Score: {r2_score(y_test, y_pred)}")
 
-    def run_all(self, X_Train, y_Train, X_Test, y_Test):
+        return y_pred
+
+    def run_all(self, X_Train, y_Train, X_Test, y_Test=None):
         print("gbr:")
-        self.gbr(X_Train, y_Train, X_Test, y_Test)
+        return self.gbr(X_Train, y_Train, X_Test, y_Test)

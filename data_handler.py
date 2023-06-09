@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-_dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date", "cancellation_datetime"]
+_dates = ["booking_datetime", "checkin_date", "checkout_date", "hotel_live_date"]
 
 
 def split_data_old(X: pd.DataFrame):
@@ -26,5 +26,9 @@ def split_data(X: pd.DataFrame):
     return train_df, test_df
 
 
-def load_data(filename: str) -> pd.DataFrame:
-    return pd.read_csv(filename, parse_dates=_dates)
+def load_data(filename: str, include_cancellation) -> pd.DataFrame:
+    dates = _dates.copy()
+    if include_cancellation:
+        dates.append("cancellation_datetime")
+
+    return pd.read_csv(filename, parse_dates=dates)
